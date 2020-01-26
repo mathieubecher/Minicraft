@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{35a65ca7-39b2-4358-a645-178e7ea27a8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\postprocess">
+      <UniqueIdentifier>{9913f59f-9aeb-4d5f-9b90-112e4bd3e297}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\world">
+      <UniqueIdentifier>{9e1bf55c-86ad-4c58-87ed-159c7ad87894}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\birds">
+      <UniqueIdentifier>{32f593f5-ead6-4fbd-aec9-fe3d8bb6c6cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\render">
+      <UniqueIdentifier>{ec74df4d-6c10-4862-a659-c53695f3aaec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine">
+      <UniqueIdentifier>{845354e1-b56c-45fb-a01e-4660c9bf7299}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine\noise">
+      <UniqueIdentifier>{fa439b99-b5d6-4f47-8887-e76cdee74fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\sun">
+      <UniqueIdentifier>{0e47952b-3123-4fc5-b434-12b1960f75e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\cube_debug">
+      <UniqueIdentifier>{deff540a-0692-4f9f-84c6-6001f1f7344b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\cube">
+      <UniqueIdentifier>{df57738d-520d-4026-970c-945341e9d7d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine\render">
+      <UniqueIdentifier>{75d7c323-8b30-4ce8-97d7-f825373fcbfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\input">
+      <UniqueIdentifier>{fffcc36d-a5e8-4ba5-88e3-67d7b72a2835}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\utils">
+      <UniqueIdentifier>{173f9ef2-9b7a-4c78-a492-59a254c0f359}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine\utils">
+      <UniqueIdentifier>{e71984fc-dd3f-4576-83f1-dde3dab01906}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\engine_minicraft.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\avatar.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\chunk.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cube.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\noise\perlin.h">
+      <Filter>Fichiers d%27en-tête\engine\noise</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\render\camera.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\utils\utils.h">
+      <Filter>Fichiers d%27en-tête\engine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\utils\timer.h">
+      <Filter>Fichiers d%27en-tête\engine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\utils\types.h">
+      <Filter>Fichiers d%27en-tête\engine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\utils\types_3d.h">
+      <Filter>Fichiers d%27en-tête\engine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\render\tex_manager.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Inputs.h">
+      <Filter>Fichiers d%27en-tête\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input.h">
+      <Filter>Fichiers d%27en-tête\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\atlasMap.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MCubes.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\render\fbo.cpp">
+      <Filter>Fichiers sources\render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\render\vbo.cpp">
+      <Filter>Fichiers sources\render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\utils\utils.cpp">
+      <Filter>Fichiers sources\utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="run\shaders\postprocess\fs.glsl">
+      <Filter>shaders\postprocess</Filter>
+    </None>
+    <None Include="run\shaders\world\fs.glsl">
+      <Filter>shaders\world</Filter>
+    </None>
+    <None Include="run\shaders\world\vs.glsl">
+      <Filter>shaders\world</Filter>
+    </None>
+    <None Include="run\shaders\birds\fs.glsl">
+      <Filter>shaders\birds</Filter>
+    </None>
+    <None Include="run\shaders\birds\vs.glsl">
+      <Filter>shaders\birds</Filter>
+    </None>
+    <None Include="run\shaders\sun\fs.glsl">
+      <Filter>shaders\sun</Filter>
+    </None>
+    <None Include="run\shaders\sun\vs.glsl">
+      <Filter>shaders\sun</Filter>
+    </None>
+    <None Include="run\shaders\cube\fs.glsl">
+      <Filter>shaders\cube</Filter>
+    </None>
+    <None Include="run\shaders\cube\vs.glsl">
+      <Filter>shaders\cube</Filter>
+    </None>
+    <None Include="run\shaders\cube_debug\fs.glsl">
+      <Filter>shaders\cube_debug</Filter>
+    </None>
+    <None Include="run\shaders\cube_debug\vs.glsl">
+      <Filter>shaders\cube_debug</Filter>
+    </None>
+  </ItemGroup>
+</Project>
