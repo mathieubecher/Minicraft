@@ -27,16 +27,16 @@ public:
 	static const int AXIS_Z = 0b00000100;
 
 #ifdef _DEBUG
-	static const int MAT_SIZE = 400; //en nombre de chunks
+	static const int MAT_SIZE = 200; //en nombre de chunks
 #else
 	static const int MAT_SIZE = 3; //en nombre de chunks
 #endif // DEBUG
 
 	static const int MAT_HEIGHT = 3; //en nombre de chunks
 	static const int MAT_SIZE_CUBES = (MAT_SIZE * MCubes::CHUNK_SIZE);
-	static const int MAT_HEIGHT_CUBES = (MAT_HEIGHT * MCubes::CHUNK_SIZE);
+	static const int MAT_HEIGHT_CUBES = (MAT_HEIGHT * MCubes::CHUNK_HEIGHT);
 	static const int MAT_SIZE_METERS = (MAT_SIZE * MCubes::CHUNK_SIZE * MCube::CUBE_SIZE);
-	static const int MAT_HEIGHT_METERS = (MAT_HEIGHT * MCubes::CHUNK_SIZE  * MCube::CUBE_SIZE);
+	static const int MAT_HEIGHT_METERS = (MAT_HEIGHT * MCubes::CHUNK_HEIGHT  * MCube::CUBE_SIZE);
 
 	static const int PERLINBOTTONBASE = 40;
 	static const int PERLINHEIGHTBASE = 100;
@@ -66,20 +66,19 @@ public:
 
 		srand(seed);
 
-		MCubes::Perlin.setFreq(0.02f);
-		MCubes::Perlin1.setFreq(0.04f);
-		MCubes::Perlin2.setFreq(0.2f);
-
-		MCubes::PBottom.setFreq(0.003f);
-		MCubes::PHeight.setFreq(0.008f);
+		MCubes::Perlin.setFreq(0.015f);
+		MCubes::Perlin1.setFreq(0.02f);
+		MCubes::Perlin2.setFreq(0.04f);
+		MCubes::PerlinBottom.setFreq(0.005f);
+		MCubes::PerlinHeight.setFreq(0.01f);
 
 	}
 	// Récupération du cube xyz
 	inline MCube * getCube(int x, int y, int z)
 	{
-		int Xchunk = (int)floor(x / MCubes::CHUNK_SIZE), Ychunk = (int)floor(y / MCubes::CHUNK_SIZE), Zchunk = (int)floor(z / MCubes::CHUNK_SIZE);
+		int Xchunk = (int)floor(x / MCubes::CHUNK_SIZE), Ychunk = (int)floor(y / MCubes::CHUNK_SIZE), Zchunk = (int)floor(z / MCubes::CHUNK_HEIGHT);
 		for (auto chunk : listChunks) {
-			if (Xchunk == chunk->_XPos && Ychunk == chunk->_YPos && Zchunk == chunk->_ZPos) return chunk->_Cubes->get(x % MCubes::CHUNK_SIZE,y % MCubes::CHUNK_SIZE,z % MCubes::CHUNK_SIZE);
+			if (Xchunk == chunk->_XPos && Ychunk == chunk->_YPos && Zchunk == chunk->_ZPos) return chunk->_Cubes->get(x % MCubes::CHUNK_SIZE,y % MCubes::CHUNK_SIZE,z % MCubes::CHUNK_HEIGHT);
 		}
 		return &MCube::Air;
 	}
@@ -92,7 +91,7 @@ public:
 		if (z < 0)z = 0;
 		if (x >= MAT_SIZE * MCubes::CHUNK_SIZE)x = (MAT_SIZE * MCubes::CHUNK_SIZE) - 1;
 		if (y >= MAT_SIZE * MCubes::CHUNK_SIZE)y = (MAT_SIZE * MCubes::CHUNK_SIZE) - 1;
-		if (z >= MAT_HEIGHT * MCubes::CHUNK_SIZE)z = (MAT_HEIGHT * MCubes::CHUNK_SIZE) - 1; {
+		if (z >= MAT_HEIGHT * MCubes::CHUNK_HEIGHT)z = (MAT_HEIGHT * MCubes::CHUNK_HEIGHT) - 1; {
 			// Chunks[x / MCubes::CHUNK_SIZE][y / MCubes::CHUNK_SIZE][z / MCubes::CHUNK_SIZE]->disableHiddenCubes();
 			// Chunks[x / MCubes::CHUNK_SIZE][y / MCubes::CHUNK_SIZE][z / MCubes::CHUNK_SIZE]->toVbos();
 		}
@@ -127,8 +126,8 @@ public:
 	void initCam(YCamera * camera) {
 		mainCamera = camera;
 		YVec3f campos = mainCamera->Position;
-		camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_SIZE));
-		addChunk((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_SIZE));
+		camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
+		addChunk((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
 		loadNearChunk();
 		firstCast = false;
 		updateCampos = true;
@@ -170,12 +169,12 @@ public:
 						lock.lock();
 						MChunk * chunk = listChunks[i];
 						lock.unlock();
-						if (chunk->vbo && chunk->physic && YVec3f(camChunk.X - chunk->_XPos, camChunk.Y - chunk->_YPos, camChunk.Z - chunk->_ZPos).getSize() > RADIUS) {
+						if (chunk->vbo && chunk->physic && chunk->draw && YVec3f(camChunk.X - chunk->_XPos, camChunk.Y - chunk->_YPos, camChunk.Z - chunk->_ZPos).getSize() > RADIUS) {
 							chunk->deleteCubes();
 						}
 					
 						
-						else if (chunk->vbo && !chunk->physic && YVec3f(camChunk.X - chunk->_XPos, camChunk.Y - chunk->_YPos, camChunk.Z - chunk->_ZPos).getSize() <= RADIUS) {
+						else if (chunk->vbo && !chunk->physic && chunk->draw && YVec3f(camChunk.X - chunk->_XPos, camChunk.Y - chunk->_YPos, camChunk.Z - chunk->_ZPos).getSize() <= RADIUS) {
 							chunk->reloadCubes();
 							chunk->generate();
 							chunk->disableHiddenCubes();
@@ -198,7 +197,7 @@ public:
 	// ADAPTE LENVIRONNEMENT A LA NOUVELLE POSITION DE LA CAMERA
 	void updateCam() {
 		YVec3f campos = mainCamera->Position;
-		camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_SIZE));
+		camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
 		updateCampos |= refreshActualChunk(campos);
 	
 
@@ -211,8 +210,12 @@ public:
 	void loadNewVBO() {
 		MChunk * chunk = toVBOs.front();
 		toVBOs.pop();
-		chunk->CreateVboGpu();
-		chunk->draw = true;
+
+		if(!chunk->draw){
+			
+			chunk->CreateVboGpu();
+			chunk->draw = true;
+		}
 	}
 
 	// VERIFIE SI LA CAMERA A CHANGER DE CHUNK
@@ -220,11 +223,11 @@ public:
 		bool findactual = false;
 		if (campos.X >= 0 && campos.X < MCubes::CHUNK_SIZE * MAT_SIZE &&
 			campos.Y >= 0 && campos.Y < MCubes::CHUNK_SIZE * MAT_SIZE &&
-			campos.Z >= 0 && campos.Z < MCubes::CHUNK_SIZE * MAT_HEIGHT)
+			campos.Z >= 0 && campos.Z < MCubes::CHUNK_HEIGHT * MAT_HEIGHT)
 		{
 			while(actualChunk && !(campos.X >= actualChunk->_XPos * MCubes::CHUNK_SIZE  && campos.X < (actualChunk->_XPos + 1) * MCubes::CHUNK_SIZE &&
 				campos.Y >= actualChunk->_YPos * MCubes::CHUNK_SIZE  && campos.Y < (actualChunk->_YPos + 1) * MCubes::CHUNK_SIZE &&
-				campos.Z >= actualChunk->_ZPos * MCubes::CHUNK_SIZE  && campos.Z < (actualChunk->_ZPos + 1) * MCubes::CHUNK_SIZE)){
+				campos.Z >= actualChunk->_ZPos * MCubes::CHUNK_HEIGHT  && campos.Z < (actualChunk->_ZPos + 1) * MCubes::CHUNK_HEIGHT)){
 				if ((int)floor(campos.X / MCubes::CHUNK_SIZE) < actualChunk->_XPos) {
 					actualChunk = actualChunk->Voisins[MChunk::Voisin::XPREV];
 					findactual = true;
@@ -233,7 +236,7 @@ public:
 					actualChunk = actualChunk->Voisins[MChunk::Voisin::YPREV];
 					findactual = true;
 				}
-				else if ((int)floor(campos.Z / MCubes::CHUNK_SIZE) < actualChunk->_ZPos) {
+				else if ((int)floor(campos.Z / MCubes::CHUNK_HEIGHT) < actualChunk->_ZPos) {
 					actualChunk = actualChunk->Voisins[MChunk::Voisin::ZPREV];
 					findactual = true;
 				}
@@ -245,7 +248,7 @@ public:
 					actualChunk = actualChunk->Voisins[MChunk::Voisin::YNEXT];
 					findactual = true;
 				}
-				else if ((int)floor(campos.Z / MCubes::CHUNK_SIZE) > actualChunk->_ZPos) {
+				else if ((int)floor(campos.Z / MCubes::CHUNK_HEIGHT) > actualChunk->_ZPos) {
 					actualChunk = actualChunk->Voisins[MChunk::Voisin::ZNEXT];
 					findactual = true;
 				}
@@ -330,7 +333,7 @@ public:
 		if (y - 1 >= 0 && !alreadyTreat(YVec3<int>(x, y - 1, z)))	neighbours.push_back(YVec3<int>(x, y - 1, z));
 		if (y + 1 < MAT_SIZE && !alreadyTreat(YVec3<int>(x, y + 1, z))) neighbours.push_back(YVec3<int>(x, y + 1, z));
 		if (z - 1 >= 0 && !alreadyTreat(YVec3<int>(x, y, z - 1))) neighbours.push_back(YVec3<int>(x, y, z - 1));
-		if (z + 1 < MAT_SIZE && !alreadyTreat(YVec3<int>(x, y, z + 1))) neighbours.push_back(YVec3<int>(x, y, z + 1));
+		if (z + 1 < MAT_HEIGHT && !alreadyTreat(YVec3<int>(x, y, z + 1))) neighbours.push_back(YVec3<int>(x, y, z + 1));
 
 		
 		//while (neighbours.size() > 1000) neighbours.pop_back();
@@ -624,7 +627,7 @@ public:
 			//chunk->toVbos();
 			if (chunk->draw && !chunk->SetHide(camPos, camDir)) {
 				glPushMatrix();
-				glTranslatef(chunk->_XPos * MCubes::CHUNK_SIZE, chunk->_YPos *MCubes::CHUNK_SIZE, chunk->_ZPos * MCubes::CHUNK_SIZE);
+				glTranslatef(chunk->_XPos * MCubes::CHUNK_SIZE, chunk->_YPos *MCubes::CHUNK_SIZE, chunk->_ZPos * MCubes::CHUNK_HEIGHT);
 				glUseProgram(shader);
 				YEngine::getInstance()->Renderer->updateMatricesFromOgl(); //Calcule toute les matrices à partir des deux matrices OGL
 				YEngine::getInstance()->Renderer->sendMatricesToShader(shader); //Envoie les matrices au shader
@@ -641,7 +644,7 @@ public:
 			//chunk->toVbos();
 			if (chunk->draw && !chunk->SetHide(camPos, camDir)) {
 				glPushMatrix();
-				glTranslatef(chunk->_XPos * MCubes::CHUNK_SIZE, chunk->_YPos *MCubes::CHUNK_SIZE, chunk->_ZPos * MCubes::CHUNK_SIZE);
+				glTranslatef(chunk->_XPos * MCubes::CHUNK_SIZE, chunk->_YPos *MCubes::CHUNK_SIZE, chunk->_ZPos * MCubes::CHUNK_HEIGHT);
 				glUseProgram(shader);
 				YEngine::getInstance()->Renderer->updateMatricesFromOgl(); //Calcule toute les matrices à partir des deux matrices OGL
 				YEngine::getInstance()->Renderer->sendMatricesToShader(shader); //Envoie les matrices au shader

@@ -61,8 +61,8 @@ public :
 		YLog::log(YLog::ENGINE_INFO,"Minicraft Started : initialisation");
 
 		Renderer->setBackgroundColor(YColor(0.0f,0.0f,0.0f,1.0f));
-		Renderer->Camera->setPosition(YVec3f(50, 50, 80));
-		Renderer->Camera->setLookAt(YVec3f(0,0,2));
+		Renderer->Camera->setPosition(YVec3f(70, 70, 80));
+		Renderer->Camera->setLookAt(YVec3f(140,140,80));
 		
 		// Load Mesh
 		VboCube = createGPUCube();

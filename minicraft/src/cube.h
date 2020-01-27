@@ -10,7 +10,7 @@ public :
 
 	enum MCubeType	
 	{
-		CUBE_HERBE = 0,
+		CUBE_HERBE = 1,
 		CUBE_TERRE,
 		CUBE_BOIS,
 		CUBE_PIERRE,

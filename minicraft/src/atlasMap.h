@@ -55,5 +55,7 @@ public:
 		atlas[MCube::MCubeType::CUBE_TERRE] = AtlasId(2,0,2,0,2,0);
 		atlas[MCube::MCubeType::CUBE_PIERRE] = AtlasId(1,0,1,0,1,0);
 		atlas[MCube::MCubeType::CUBE_EAU] = AtlasId(13,12, 13, 12, 13, 12);
+		atlas[MCube::MCubeType::CUBE_SABLE_01] = AtlasId(2,1, 2, 1, 2, 1);
+		atlas[MCube::MCubeType::CUBE_SABLE_02] = AtlasId(0,11, 0, 12, 0, 13);
 	}
 };

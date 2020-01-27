@@ -10,6 +10,7 @@
 #include <fstream>
 #include <chrono>
 #include <ctime>    
+#include <mutex>
 
 /**
   * On utilise des chunks pour que si on modifie juste un cube, on ait pas
@@ -20,17 +21,19 @@ class YFile;
 class MChunk
 {
 public:
+	bool resetSeed = true; 
+
 	void WriteChunk() {
 		// auto start = std::chrono::system_clock::now();
 		// Some computation here
 		MCubes * cubes = dynamic_cast<MCubes*>(_Cubes);
 
-		char* buffer = new char[MCubes::CHUNK_SIZE * MCubes::CHUNK_SIZE * MCubes::CHUNK_SIZE];
+		char* buffer = new char[MCubes::CHUNK_SIZE * MCubes::CHUNK_SIZE * MCubes::CHUNK_HEIGHT];
 		
 		for (int x = 0; x < MCubes::CHUNK_SIZE; ++x)
 			for (int y = 0; y < MCubes::CHUNK_SIZE; ++y) {
-				for (int z = 0; z < MCubes::CHUNK_SIZE; ++z) {
-					buffer[x + MCubes::CHUNK_SIZE * (y + MCubes::CHUNK_SIZE * z)] = cubes->_Cubes[x][y][z].getType();
+				for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z) {
+					buffer[z + MCubes::CHUNK_SIZE * (y + MCubes::CHUNK_SIZE * x)] = cubes->_Cubes[x][y][z].getType();
 				}
 			}
 		// auto endconversion = std::chrono::system_clock::now();
@@ -67,8 +70,8 @@ public:
 
 			for (int x = 0; x < MCubes::CHUNK_SIZE; ++x)
 				for (int y = 0; y < MCubes::CHUNK_SIZE; ++y) {
-					for (int z = 0; z < MCubes::CHUNK_SIZE; ++z) {
-						cubes->_Cubes[x][y][z].setType((MCube::MCubeType)buffer[x + MCubes::CHUNK_SIZE * (y + MCubes::CHUNK_SIZE * z)]);
+					for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z) {
+						cubes->_Cubes[x][y][z].setType((MCube::MCubeType)buffer[z + MCubes::CHUNK_SIZE * (y + MCubes::CHUNK_SIZE * x)]);
 					}
 				}
 			
@@ -103,7 +106,7 @@ public:
 	YVbo * VboTransparent = NULL;
 
 	MChunk * Voisins[6];
-
+	mutex vboLock;
 
 	enum Voisin {
 		XPREV = 0,
@@ -118,7 +121,7 @@ public:
 
 	bool hide = true;
 	bool draw = false;
-	bool physic = true;
+	bool physic = false;
 	bool vbo = false;
 
 	MChunk(int x, int y, int z) 
@@ -131,7 +134,7 @@ public:
 
 	}
 	~MChunk() {
-		cout << "suppression du chunl [" << _XPos << ";" << _YPos << ";" << _ZPos << "]"<<endl;
+		//cout << "suppression du chunk [" << _XPos << ";" << _YPos << ";" << _ZPos << "]"<<endl;
 		delete _Cubes;
 		if (Voisins[XPREV] != NULL) Voisins[XPREV]->Voisins[XNEXT] = NULL;
 		if (Voisins[XNEXT] != NULL) Voisins[XNEXT]->Voisins[XPREV] = NULL;
@@ -146,21 +149,21 @@ public:
 		return hide;
 	}
 	bool Hide(YVec3f pos, YVec3f dir) {
-		YVec3f chunkPosBase = YVec3f(_XPos * MCubes::CHUNK_SIZE, _YPos * MCubes::CHUNK_SIZE, _ZPos * MCubes::CHUNK_SIZE);
+		YVec3f chunkPosBase = YVec3f(_XPos * MCubes::CHUNK_SIZE, _YPos * MCubes::CHUNK_SIZE, _ZPos * MCubes::CHUNK_HEIGHT);
 		float maxAngle = 0;
-		YVec3f chunkDir = (chunkPosBase + YVec3f(0,0,MCubes::CHUNK_SIZE) - pos).normalize();
+		YVec3f chunkDir = (chunkPosBase + YVec3f(0,0,MCubes::CHUNK_HEIGHT) - pos).normalize();
 		float angle = chunkDir.dot(dir) / (sqrt(pow(chunkDir.X, 2) + pow(chunkDir.Y, 2) + pow(chunkDir.Z, 2))*sqrt(pow(dir.X, 2) + pow(dir.Y, 2) + pow(dir.Z, 2)));
 		if(angle > maxAngle) return false;
 
-		chunkDir = (chunkPosBase + YVec3f(MCubes::CHUNK_SIZE, 0, MCubes::CHUNK_SIZE) - pos).normalize();
+		chunkDir = (chunkPosBase + YVec3f(MCubes::CHUNK_SIZE, 0, MCubes::CHUNK_HEIGHT) - pos).normalize();
 		angle = chunkDir.dot(dir) / (sqrt(pow(chunkDir.X, 2) + pow(chunkDir.Y, 2) + pow(chunkDir.Z, 2))*sqrt(pow(dir.X, 2) + pow(dir.Y, 2) + pow(dir.Z, 2)));
 		if (angle > maxAngle) return false;
 
-		chunkDir = (chunkPosBase + YVec3f(MCubes::CHUNK_SIZE, MCubes::CHUNK_SIZE, MCubes::CHUNK_SIZE) - pos).normalize();
+		chunkDir = (chunkPosBase + YVec3f(MCubes::CHUNK_SIZE, MCubes::CHUNK_SIZE, MCubes::CHUNK_HEIGHT) - pos).normalize();
 		angle = chunkDir.dot(dir) / (sqrt(pow(chunkDir.X, 2) + pow(chunkDir.Y, 2) + pow(chunkDir.Z, 2))*sqrt(pow(dir.X, 2) + pow(dir.Y, 2) + pow(dir.Z, 2)));
 		if (angle > maxAngle) return false;
 
-		chunkDir = (chunkPosBase + YVec3f(0, MCubes::CHUNK_SIZE, MCubes::CHUNK_SIZE) - pos).normalize();
+		chunkDir = (chunkPosBase + YVec3f(0, MCubes::CHUNK_SIZE, MCubes::CHUNK_HEIGHT) - pos).normalize();
 		angle = chunkDir.dot(dir) / (sqrt(pow(chunkDir.X, 2) + pow(chunkDir.Y, 2) + pow(chunkDir.Z, 2))*sqrt(pow(dir.X, 2) + pow(dir.Y, 2) + pow(dir.Z, 2)));
 		if (angle > maxAngle) return false;
 
@@ -200,11 +203,13 @@ public:
 	}
 	void generate() {
 
-		if (Exist(_XPos, _YPos, _ZPos)) ReadChunk();
+		if (Exist(_XPos, _YPos, _ZPos) && !resetSeed) ReadChunk();
 		else {
+			reset();
 			_Cubes->generate(_XPos, _YPos, _ZPos);
 			WriteChunk();
 		}
+		physic = true;
 	}
 	/*
 	Creation des VBO
@@ -216,9 +221,10 @@ public:
 	//On met le chunk ddans son VBO
 	void toVbos(void)
 	{
+		vboLock.lock();
 		SAFEDELETE(VboOpaque);
 		SAFEDELETE(VboTransparent);
-
+		
 		//Compter les sommets
 		if (updateVert) {
 			foreachVisibleTriangle(true, nbVertOpaque, nbVertTransp, VboOpaque, VboTransparent);
@@ -242,9 +248,11 @@ public:
 		//Remplir les VBO
 		foreachVisibleTriangle(false, nbVertOpaque, nbVertTransp, VboOpaque, VboTransparent);
 		vbo = true;
+		vboLock.unlock();
 	}
 
 	void CreateVboGpu() {
+		vboLock.lock();
 		// On envoie le contenu au GPU
 		VboOpaque->createVboGpu();
 		// On clean le contenu du CPU
@@ -253,6 +261,7 @@ public:
 		VboTransparent->createVboGpu();
 		// On clean le contenu du CPU
 		VboTransparent->deleteVboCpu();
+		vboLock.unlock();
 	}
 
 	//Ajoute un quad du cube. Attention CCW
@@ -314,7 +323,7 @@ public:
 		int iVerticeTransp = 0;
 		for (int x = 0; x < MCubes::CHUNK_SIZE; ++x)
 			for (int y = 0; y < MCubes::CHUNK_SIZE; ++y)
-				for (int z = 0; z < MCubes::CHUNK_SIZE; ++z) {
+				for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z) {
 					MCube cube = *(_Cubes->get(x, y,z));
 					bool opaque = cube.isOpaque();
 					if (cube.getDraw() ) {
@@ -322,7 +331,7 @@ public:
 							
 							int _NbVert = 0;
 							if (z - 1 < 0 || (opaque &&  _Cubes->get(x,y,z - 1)->isTransparent() || !opaque && !_Cubes->get(x,y,z - 1)->isPickable())) _NbVert += 6;
-							if (z + 1 >= MCubes::CHUNK_SIZE || (opaque &&  _Cubes->get(x,y,z + 1)->isTransparent() || !opaque && !_Cubes->get(x,y,z + 1)->isPickable())) _NbVert += 6;
+							if (z + 1 >= MCubes::CHUNK_HEIGHT || (opaque &&  _Cubes->get(x,y,z + 1)->isTransparent() || !opaque && !_Cubes->get(x,y,z + 1)->isPickable())) _NbVert += 6;
 							if (y - 1 < 0 || (opaque &&  _Cubes->get(x,y - 1,z)->isTransparent() || !opaque && !_Cubes->get(x,y - 1,z)->isPickable())) _NbVert += 6;
 							if (y + 1 >= MCubes::CHUNK_SIZE || (opaque &&  _Cubes->get(x,y + 1,z)->isTransparent() || !opaque && !_Cubes->get(x,y + 1,z)->isPickable())) _NbVert += 6;
 							if (x - 1 < 0 || (opaque &&  _Cubes->get(x - 1,y,z)->isTransparent() || !opaque && !_Cubes->get(x - 1,y,z)->isPickable())) _NbVert += 6;
@@ -339,7 +348,7 @@ public:
 							int iVertice = iVerticeOpaque;
 							if (cube.isTransparent())iVertice = iVerticeTransp;
 							YVec3f size(1, 1, 1);
-							if (!cube.isSolid() && (z>=MCubes::CHUNK_SIZE || !_Cubes->get(x,y,z+1)->isPickable())) size.Z = 0.9f;
+							if (!cube.isSolid() && (z>=MCubes::CHUNK_HEIGHT || !_Cubes->get(x,y,z+1)->isPickable())) size.Z = 0.9f;
 
 							if(z - 1 < 0 || (opaque &&  _Cubes->get(x, y, z - 1)->isTransparent() || !opaque && !_Cubes->get(x,y,z - 1)->isPickable())){
 								YVec3f a = YVec3f(x, y, z);
@@ -348,7 +357,7 @@ public:
 								YVec3f d = YVec3f(x + size.X, y, z);
 								iVertice += addQuadToVbo((!cube.isTransparent()) ? VboOpaque : VboTrasparent, iVertice, a, b, c, d, cube.getType(), MCubeType::BOTTOM);
 							}
-							if (z + 1 >= MCubes::CHUNK_SIZE || (opaque &&  _Cubes->get(x,y,z + 1)->isTransparent() || !opaque && !_Cubes->get(x,y,z + 1)->isPickable())) {
+							if (z + 1 >= MCubes::CHUNK_HEIGHT || (opaque &&  _Cubes->get(x,y,z + 1)->isTransparent() || !opaque && !_Cubes->get(x,y,z + 1)->isPickable())) {
 								YVec3f b = YVec3f(x, y, z + size.Z);
 								YVec3f c = YVec3f(x + size.X, y, z + size.Z);
 								YVec3f d = YVec3f(x + size.X, y + size.Y, z + size.Z);
@@ -402,7 +411,7 @@ public:
 	{
 		for (int x = 0; x < MCubes::CHUNK_SIZE; x++)
 			for (int y = 0; y < MCubes::CHUNK_SIZE; y++)
-				for (int z = 0; z < MCubes::CHUNK_SIZE; z++)
+				for (int z = 0; z < MCubes::CHUNK_HEIGHT; z++)
 				{
 					_Cubes->get(x,y,z)->setDraw(false);
 					_Cubes->get(x, y, z)->setType(MCube::CUBE_AIR);
@@ -452,13 +461,13 @@ public:
 			*cubeYNext = (_Cubes->get(x,y + 1,z));
 
 		if (z == 0 && Voisins[4] != NULL)
-			*cubeZPrev = (Voisins[4]->_Cubes->get(x,y,MCubes::CHUNK_SIZE - 1));
+			*cubeZPrev = (Voisins[4]->_Cubes->get(x,y,MCubes::CHUNK_HEIGHT - 1));
 		else if (z > 0)
 			*cubeZPrev = (_Cubes->get(x,y,z - 1));
 
-		if (z == MCubes::CHUNK_SIZE - 1 && Voisins[5] != NULL)
+		if (z == MCubes::CHUNK_HEIGHT - 1 && Voisins[5] != NULL)
 			*cubeZNext = (Voisins[5]->_Cubes->get(x,y,0));
-		else if (z < MCubes::CHUNK_SIZE - 1)
+		else if (z < MCubes::CHUNK_HEIGHT - 1)
 			*cubeZNext = (_Cubes->get(x,y,z + 1));
 	}
 
@@ -504,13 +513,13 @@ public:
 			cubeYNext = (_Cubes->get(x,y + 1,z));
 
 		if (z == 0 && Voisins[4] != NULL)
-			cubeZPrev = (Voisins[4]->_Cubes->get(x,y,MCubes::CHUNK_SIZE - 1));
+			cubeZPrev = (Voisins[4]->_Cubes->get(x,y,MCubes::CHUNK_HEIGHT - 1));
 		else if (z > 0)
 			cubeZPrev = (_Cubes->get(x,y,z - 1));
 
-		if (z == MCubes::CHUNK_SIZE - 1 && Voisins[5] != NULL)
+		if (z == MCubes::CHUNK_HEIGHT - 1 && Voisins[5] != NULL)
 			cubeZNext = (Voisins[5]->_Cubes->get(x,y,0));
-		else if (z < MCubes::CHUNK_SIZE - 1)
+		else if (z < MCubes::CHUNK_HEIGHT - 1)
 			cubeZNext = (_Cubes->get(x,y,z + 1));
 
 		if (cubeXPrev == NULL || cubeXNext == NULL ||
@@ -532,7 +541,7 @@ public:
 	{
 		for (int x = 0; x < MCubes::CHUNK_SIZE; x++)
 			for (int y = 0; y < MCubes::CHUNK_SIZE; y++)
-				for (int z = 0; z < MCubes::CHUNK_SIZE; z++)
+				for (int z = 0; z < MCubes::CHUNK_HEIGHT; z++)
 				{
 					
 					_Cubes->get(x, y, z)->setDraw(true);

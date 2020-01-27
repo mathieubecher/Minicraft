@@ -17,10 +17,7 @@ out vec3 normal;
 out vec4 color;
 out vec2 uv;
 
-#define CUBE_HERBE 0.0
-#define CUBE_TERRE 1.0
-#define CUBE_EAU 4.0
-#define CUBE_PIERRE 3.0
+#define CUBE_HERBE 1.0
 
 void main()
 {
