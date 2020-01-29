@@ -21,65 +21,96 @@ class YFile;
 class MChunk
 {
 public:
-	bool resetSeed = true; 
+	bool resetSeed = false; 
 
 	void WriteChunk() {
 		// auto start = std::chrono::system_clock::now();
 		// Some computation here
 		MCubes * cubes = dynamic_cast<MCubes*>(_Cubes);
 
-		char* buffer = new char[MCubes::CHUNK_SIZE * MCubes::CHUNK_SIZE * MCubes::CHUNK_HEIGHT];
+		uint8* buffer = new uint8[MCubes::CHUNK_SIZE * MCubes::CHUNK_SIZE * MCubes::CHUNK_HEIGHT*4];
 		
-		for (int x = 0; x < MCubes::CHUNK_SIZE; ++x)
+		MCube::MCubeType cubeType = cubes->_Cubes[0][0][0].getType();
+		uint16 nbOccur = 0;
+		int allCase = 0;
+		int posInFile = -1;
+		for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z)
 			for (int y = 0; y < MCubes::CHUNK_SIZE; ++y) {
-				for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z) {
-					buffer[z + MCubes::CHUNK_SIZE * (y + MCubes::CHUNK_SIZE * x)] = cubes->_Cubes[x][y][z].getType();
+				for (int x = 0; x < MCubes::CHUNK_SIZE; ++x) {
+					++allCase;
+					if (cubes->_Cubes[x][y][z].getType() == cubeType) ++nbOccur;
+
+
+					if((cubes->_Cubes[x][y][z].getType() != cubeType || nbOccur == 0xFFFF) || (z+1 == MCubes::CHUNK_HEIGHT && y + 1 == MCubes::CHUNK_SIZE && x + 1 == MCubes::CHUNK_SIZE) ) {
+						bool endnull = (nbOccur & 0xFF00) == 0x0000;
+						bool basenull = (nbOccur & 0x00FF) == 0x0000;
+
+						uint8 occurInfo = 0x80 | ((basenull)? 0x00 : 0x01) | ((endnull)? 0x00 : 0x02);
+						buffer[++posInFile] = (MCube::MCubeType)cubeType;
+						buffer[++posInFile] = occurInfo;
+						
+						buffer[++posInFile] = (!endnull) ? (nbOccur >> 8) : 0xff;
+						buffer[++posInFile] = (!basenull) ? nbOccur: 0xff;
+
+						if (nbOccur < 0xFFFF) nbOccur = 1;
+						else nbOccur = 0;
+						cubeType = cubes->_Cubes[x][y][z].getType();
+					}
+					
 				}
 			}
-		// auto endconversion = std::chrono::system_clock::now();
+		buffer[++posInFile] = 0x00;
 
 		string path = ToPath(_XPos, _YPos, _ZPos);
 
-		ofstream myfile(path);
+		ofstream myfile(path, std::ofstream::binary);
 		myfile << buffer;
+
+		buffer[posInFile] = 0x01;
 		delete[] buffer;
 		myfile.close();
-
-		// auto end = std::chrono::system_clock::now();
-
-		// std::chrono::duration<double> total = end - start;
-		// std::chrono::duration<double> conversion = endconversion - start;
-		// std::chrono::duration<double> save =  end - endconversion;
-		// cout << "Sauvegarde du chunk - total : " <<  total.count() * 1000 << "ms, conversion : " << conversion.count() * 1000 << "ms, save : " << save.count() * 1000 << "ms"<< endl;
 	}
 
 	void ReadChunk() {
 		if (Exist(_XPos, _YPos, _ZPos)) {
 			MCubes * cubes = dynamic_cast<MCubes*>(_Cubes);
-
 			// auto start = std::chrono::system_clock::now();
 
 			ifstream myfile(ToPath(_XPos, _YPos, _ZPos), std::ifstream::binary);
 			std::filebuf* pbuf = myfile.rdbuf();
-			std::size_t size = pbuf->pubseekoff(0, myfile.end, myfile.in);
+			uint16 size = pbuf->pubseekoff(0, myfile.end, myfile.in);
 			pbuf->pubseekpos(0, myfile.in);
-			char* buffer = new char[size];
-			pbuf->sgetn(buffer, size);
-
+			uint8* buffer = new uint8[size];
+			pbuf->sgetn((char*)buffer, size);
 			myfile.close();
 
-			for (int x = 0; x < MCubes::CHUNK_SIZE; ++x)
+			int posInFile = 0;
+			MCube::MCubeType cubeType;
+			uint16 nbOccur = 0;
+
+			for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z)
 				for (int y = 0; y < MCubes::CHUNK_SIZE; ++y) {
-					for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z) {
-						cubes->_Cubes[x][y][z].setType((MCube::MCubeType)buffer[z + MCubes::CHUNK_SIZE * (y + MCubes::CHUNK_SIZE * x)]);
+					for (int x = 0; x < MCubes::CHUNK_SIZE; ++x) {
+
+						
+						if (nbOccur == 0) {
+							cubeType = (MCube::MCubeType)buffer[posInFile];
+							++posInFile;
+							uint8 occurinfo = buffer[posInFile];
+							++posInFile;
+							nbOccur = ((occurinfo & 2) == 0x02) ? buffer[posInFile] << 8 : 0x00;
+							++posInFile;
+							nbOccur |= ((occurinfo & 1) == 0x01) ? buffer[posInFile] : 0x00;
+							++posInFile;
+						}
+
+						nbOccur--;
+						cubes->_Cubes[x][y][z].setType(cubeType);
 					}
 				}
 			
-			// auto end = std::chrono::system_clock::now();
-			// std::chrono::duration<double> total = end - start;
 
 			delete[] buffer;
-			// cout << "Lecture du chunk - total : " << total.count() * 1000 << "ms"<< endl;
 		}
 	}
 	static bool Exist(int x, int y, int z) {
@@ -142,7 +173,7 @@ public:
 		if (Voisins[YNEXT] != NULL) Voisins[YNEXT]->Voisins[YPREV] = NULL;
 		if (Voisins[ZPREV] != NULL) Voisins[ZPREV]->Voisins[ZNEXT] = NULL;
 		if (Voisins[ZNEXT] != NULL) Voisins[ZNEXT]->Voisins[ZPREV] = NULL;
-
+		cout << "end destroy chunk " << _XPos << _YPos << _ZPos << endl;
 	}
 	bool SetHide(YVec3f pos, YVec3f dir) {
 		hide = Hide(pos, dir);
@@ -188,18 +219,19 @@ public:
 	}
 
 	void deleteCubes() {
-
+		physic = false;
 		//cout << "delete : " << sizeof(_Cubes) << endl << endl << endl << endl;
 		delete _Cubes;
 		_Cubes = new MCubesClear();
-		physic = false;
+
 		//cout<<"Suppression Physic : " << _XPos << ", "<<_YPos<<", "<<_ZPos << endl;
 	}
 	void reloadCubes() {
+		physic = true;
 		delete _Cubes;
 		_Cubes = new MCubes();
 		//cout << "Recréation Physic : " << _XPos << ", " << _YPos << ", " << _ZPos << endl;
-		physic = true;
+
 	}
 	void generate() {
 
@@ -221,7 +253,6 @@ public:
 	//On met le chunk ddans son VBO
 	void toVbos(void)
 	{
-		vboLock.lock();
 		SAFEDELETE(VboOpaque);
 		SAFEDELETE(VboTransparent);
 		
@@ -248,11 +279,9 @@ public:
 		//Remplir les VBO
 		foreachVisibleTriangle(false, nbVertOpaque, nbVertTransp, VboOpaque, VboTransparent);
 		vbo = true;
-		vboLock.unlock();
 	}
 
 	void CreateVboGpu() {
-		vboLock.lock();
 		// On envoie le contenu au GPU
 		VboOpaque->createVboGpu();
 		// On clean le contenu du CPU
@@ -261,7 +290,6 @@ public:
 		VboTransparent->createVboGpu();
 		// On clean le contenu du CPU
 		VboTransparent->deleteVboCpu();
-		vboLock.unlock();
 	}
 
 	//Ajoute un quad du cube. Attention CCW

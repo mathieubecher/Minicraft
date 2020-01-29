@@ -9,14 +9,14 @@ void YVbo::createVboGpu() {
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
-	YLog::log(YLog::ENGINE_INFO, (string("Creation VAO ") + toString(VAO)).c_str());
+	//YLog::log(YLog::ENGINE_INFO, (string("Creation VAO ") + toString(VAO)).c_str());
 
 	if (VBO != 0)
 		glDeleteBuffers(1, &VBO);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	YLog::log(YLog::ENGINE_INFO, (string("Creation VBO ") + toString(VBO)).c_str());
+	//YLog::log(YLog::ENGINE_INFO, (string("Creation VBO ") + toString(VBO)).c_str());
 
 
 	//On alloue et copie les datas

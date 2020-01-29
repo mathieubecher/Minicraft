@@ -51,7 +51,6 @@ public:
 
 	virtual void generate(int _XPos, int _YPos, int _ZPos) {
 
-		//*
 		float mountainIndicator = 0.5f;
 		float oceanIndicator = 1;
 		float nivelageIndicator = 2;
@@ -91,7 +90,6 @@ public:
 			}
 
 		}
-		//*/
 		/*
 		for (int X = 0; X < CHUNK_SIZE; ++X) {
 			int x = _XPos * CHUNK_SIZE + X;

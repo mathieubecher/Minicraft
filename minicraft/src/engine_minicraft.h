@@ -61,7 +61,7 @@ public :
 		YLog::log(YLog::ENGINE_INFO,"Minicraft Started : initialisation");
 
 		Renderer->setBackgroundColor(YColor(0.0f,0.0f,0.0f,1.0f));
-		Renderer->Camera->setPosition(YVec3f(70, 70, 80));
+		Renderer->Camera->setPosition(YVec3f(60, 60, 60));
 		Renderer->Camera->setLookAt(YVec3f(140,140,80));
 		
 		// Load Mesh

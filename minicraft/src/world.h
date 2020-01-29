@@ -51,8 +51,6 @@ public:
 	std::queue<YVec3<int>> toLoads;
 	std::queue<MChunk *> toVBOs;
 
-	MChunk * actualChunk;
-
 	MWorld()
 	{
 
@@ -112,6 +110,8 @@ public:
 
 	std::thread loadder;
 	std::thread physicer;
+	std::condition_variable waitLoadder;
+	std::condition_variable waitPhysicer;
 	bool deleteLoadder = false;
 	~MWorld() {
 		deleteLoadder = true;
@@ -122,28 +122,34 @@ public:
 	std::mutex lock;
 	YCamera * mainCamera;
 	bool firstCast = true;
+
+	std::mutex mtxloadder;
+	int locknumber = 0;
+	int neighbournumber = 0;
 	// INITIALISE LES CHUNKS AUTOUR DE LA CAMERA
 	void initCam(YCamera * camera) {
 		mainCamera = camera;
 		YVec3f campos = mainCamera->Position;
 		camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
-		addChunk((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
+		addChunk(camChunk.X, camChunk.Y, camChunk.Z);
 		loadNearChunk();
 		firstCast = false;
 		updateCampos = true;
+
 		// DEBUT DU THREAD QUI GERE LES CHUNK
 		loadder = std::thread([this]() {
 			while (!deleteLoadder) {
+
 				if (updateCampos) {
 					
 					updateCampos = false;
-					if (!actualChunk ) {
-						addChunk(camChunk.X, camChunk.Y, camChunk.Z);
-					}
 					loadNearChunk();
 				}
+				std::unique_lock<std::mutex> lck(mtxloadder);
+				waitLoadder.wait(lck);
 			}
 		});
+
 		// GERE LA PHYSIQUE DES CHUNK VISIBLE
 		physicer = std::thread([this]() {
 			
@@ -153,22 +159,32 @@ public:
 				while (i < listChunks.size()) {
 					
 					if (YVec3f(camChunk.X-listChunks[i]->_XPos, camChunk.Y - listChunks[i]->_YPos, camChunk.Z - listChunks[i]->_ZPos).getSize() > RADIUSDRAW) {
+						
+						lock.lock();
+						++locknumber;
 						MChunk *chunk = listChunks[i];
+						YVec3<int> chunkPos = YVec3<int>(chunk->_XPos, chunk->_YPos, chunk->_ZPos);
+						cout << "begin destroy chunk " << chunk->_XPos << chunk->_YPos << chunk->_ZPos << endl;
 						auto it = listChunks.begin();
 						for (int j = 0; j < i; ++j) ++it;
-						lock.lock();
 						listChunks.erase(it);
-						lockNeighbour.lock();
-						neighbours.push_back(YVec3<int>(chunk->_XPos, chunk->_YPos, chunk->_ZPos));
-						lockNeighbour.unlock();
-						delete chunk;
 						lock.unlock();
+						--locknumber;
+						delete chunk;
+						lockNeighbour.lock();
+						++neighbournumber;
+						neighbours.push_back(chunkPos);
+						lockNeighbour.unlock();
+						--neighbournumber;
+						
 					}
+
 					else {
-					
 						lock.lock();
+						++locknumber;
 						MChunk * chunk = listChunks[i];
 						lock.unlock();
+						--locknumber;
 						if (chunk->vbo && chunk->physic && chunk->draw && YVec3f(camChunk.X - chunk->_XPos, camChunk.Y - chunk->_YPos, camChunk.Z - chunk->_ZPos).getSize() > RADIUS) {
 							chunk->deleteCubes();
 						}
@@ -184,7 +200,8 @@ public:
 					
 					}
 				}
-				
+				std::unique_lock<std::mutex> lck(mtxloadder);
+				waitLoadder.wait(lck);
 			}
 			
 		});
@@ -197,8 +214,13 @@ public:
 	// ADAPTE LENVIRONNEMENT A LA NOUVELLE POSITION DE LA CAMERA
 	void updateCam() {
 		YVec3f campos = mainCamera->Position;
+		YVec3<int> last = camChunk;
 		camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
-		updateCampos |= refreshActualChunk(campos);
+		updateCampos = camChunk == last;
+		if (updateCampos) {
+			waitLoadder.notify_one();
+			waitPhysicer.notify_one();
+		}
 	
 
 	}
@@ -212,91 +234,60 @@ public:
 		toVBOs.pop();
 
 		if(!chunk->draw){
-			
+			chunk->vboLock.lock();
+			++locknumber;
+			if (!chunk->vbo) {
+				cout << "prout" << endl;
+			}
 			chunk->CreateVboGpu();
 			chunk->draw = true;
+			chunk->vboLock.unlock();
+			--locknumber;
 		}
 	}
 
-	// VERIFIE SI LA CAMERA A CHANGER DE CHUNK
-	bool refreshActualChunk(YVec3f campos) {
-		bool findactual = false;
-		if (campos.X >= 0 && campos.X < MCubes::CHUNK_SIZE * MAT_SIZE &&
-			campos.Y >= 0 && campos.Y < MCubes::CHUNK_SIZE * MAT_SIZE &&
-			campos.Z >= 0 && campos.Z < MCubes::CHUNK_HEIGHT * MAT_HEIGHT)
-		{
-			while(actualChunk && !(campos.X >= actualChunk->_XPos * MCubes::CHUNK_SIZE  && campos.X < (actualChunk->_XPos + 1) * MCubes::CHUNK_SIZE &&
-				campos.Y >= actualChunk->_YPos * MCubes::CHUNK_SIZE  && campos.Y < (actualChunk->_YPos + 1) * MCubes::CHUNK_SIZE &&
-				campos.Z >= actualChunk->_ZPos * MCubes::CHUNK_HEIGHT  && campos.Z < (actualChunk->_ZPos + 1) * MCubes::CHUNK_HEIGHT)){
-				if ((int)floor(campos.X / MCubes::CHUNK_SIZE) < actualChunk->_XPos) {
-					actualChunk = actualChunk->Voisins[MChunk::Voisin::XPREV];
-					findactual = true;
-				}
-				else if ((int)floor(campos.Y / MCubes::CHUNK_SIZE) < actualChunk->_YPos) {
-					actualChunk = actualChunk->Voisins[MChunk::Voisin::YPREV];
-					findactual = true;
-				}
-				else if ((int)floor(campos.Z / MCubes::CHUNK_HEIGHT) < actualChunk->_ZPos) {
-					actualChunk = actualChunk->Voisins[MChunk::Voisin::ZPREV];
-					findactual = true;
-				}
-				else if ((int)floor(campos.X / MCubes::CHUNK_SIZE) > actualChunk->_XPos) {
-					actualChunk = actualChunk->Voisins[MChunk::Voisin::XNEXT];
-					findactual = true;
-				}
-				else if ((int)floor(campos.Y / MCubes::CHUNK_SIZE) > actualChunk->_YPos) {
-					actualChunk = actualChunk->Voisins[MChunk::Voisin::YNEXT];
-					findactual = true;
-				}
-				else if ((int)floor(campos.Z / MCubes::CHUNK_HEIGHT) > actualChunk->_ZPos) {
-					actualChunk = actualChunk->Voisins[MChunk::Voisin::ZNEXT];
-					findactual = true;
-				}
-			}
-			return findactual;
-		} return false;
-	}
 
 	mutex lockNeighbour;
 	// GENERATION DES VOISINS PAS ENCORE CHARGER
 	void loadNearChunk() {
 
-		YVec3<int> actualpos = YVec3<int>(actualChunk->_XPos, actualChunk->_YPos, actualChunk->_ZPos);
+		YVec3<int> actualpos = camChunk;
 		// nouveau tri des voisins avec la nouvelle position
 		lockNeighbour.lock();
+		++neighbournumber;
 		neighbours.sort([this](const YVec3<int> & a, YVec3<int> & b) { return compareChunk(a, b); });
 		lockNeighbour.unlock();
+		--neighbournumber;
 		while (neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast)?RADIUS:RADIUSDRAW)) {
 
 			
 			vector<thread*> t;
 			lockNeighbour.lock();
-			while (t.size() < 3 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast) ? RADIUS : RADIUSDRAW)) {
+			++neighbournumber;
+			while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast) ? RADIUS : RADIUSDRAW)) {
 				lockNeighbour.unlock();
+				--neighbournumber;
 				lockNeighbour.lock();
+				++neighbournumber;
 				YVec3<int> next = *neighbours.begin();
 				neighbours.pop_front();
 				lockNeighbour.unlock();
-
+				--neighbournumber;
 				t.push_back(new std::thread([this,next]() {
 					addChunk((int)next.X, (int)next.Y, (int)next.Z);
+
 				}));
-				lockNeighbour.lock();
+
 				// Tri du tableau
+				lockNeighbour.lock();
+				++neighbournumber;
 				neighbours.sort([this](const YVec3<int> & a, YVec3<int> & b) { return compareChunk(a, b); });
 				while (neighbours.size() > 1000) neighbours.pop_back();
 			}
 			lockNeighbour.unlock();
+			--neighbournumber;
 			for (int i = 0; i < t.size(); ++i) t[i]->join();
 			
-			/*
-			std::thread t = std::thread([this]() {
-				YVec3<int> next = *neighbours.begin();
-				neighbours.pop_front();
-				addChunk((int)next.X, (int)next.Y, (int)next.Z);
-			});
-			t.join();
-			*/
 		}
 	}
 
@@ -317,17 +308,16 @@ public:
 			SetNeighboursChunk(chunk);
 
 			lock.lock();
+			++locknumber;
 			listChunks.push_back(chunk);
 			lock.unlock();
-
-			if (!actualChunk) {
-				actualChunk = chunk;
-			}
+			--locknumber;
 		}
 
 		int x = pos.X, y = pos.Y, z = pos.Z;
 		// Ajout des nouvelles frontières
 		lockNeighbour.lock();
+		++neighbournumber;
 		if (x - 1 >= 0 && !alreadyTreat(YVec3<int>(x - 1, y, z))) neighbours.push_back(YVec3<int>(x - 1, y, z));
 		if (x + 1 < MAT_SIZE && !alreadyTreat(YVec3<int>(x + 1, y, z))) neighbours.push_back(YVec3<int>(x + 1, y, z));
 		if (y - 1 >= 0 && !alreadyTreat(YVec3<int>(x, y - 1, z)))	neighbours.push_back(YVec3<int>(x, y - 1, z));
@@ -338,14 +328,13 @@ public:
 		
 		//while (neighbours.size() > 1000) neighbours.pop_back();
 		lockNeighbour.unlock();
+		--neighbournumber;
 	}
 
 	bool compareChunk(const YVec3<int> & a, YVec3<int> & b) {
-		YVec3f A = YVec3f(a.X - actualChunk->_XPos, a.Y - actualChunk->_YPos, a.Z - actualChunk->_ZPos);
-		YVec3f B = YVec3f(b.X - actualChunk->_XPos, b.Y - actualChunk->_YPos, b.Z - actualChunk->_ZPos);
+		YVec3f A = YVec3f(a.X - camChunk.X, a.Y - camChunk.Y, a.Z - camChunk.Z);
+		YVec3f B = YVec3f(b.X - camChunk.X, b.Y - camChunk.Y, b.Z - camChunk.Z);
 		return A.getSize() < B.getSize();
-		// (a - YVec3<int>(actualChunk->_XPos, actualChunk->_YPos, actualChunk->_ZPos)).getSize() < 
-		// (b - YVec3<int>(actualChunk->_XPos, actualChunk->_YPos, actualChunk->_ZPos)).getSize();
 		
 	}
 
@@ -363,6 +352,7 @@ public:
 	}
 	void SetNeighboursChunk(MChunk * chunk) {
 		lock.lock();
+		++locknumber;
 		for (int i = 0; i < listChunks.size(); ++i) {
 			// XPREV
 			if (listChunks[i]->_XPos == chunk->_XPos + 1 && listChunks[i]->_YPos == chunk->_YPos && listChunks[i]->_ZPos == chunk->_ZPos) {
@@ -397,6 +387,7 @@ public:
 
 		}
 		lock.unlock();
+		--locknumber;
 	}
 
 
@@ -406,6 +397,7 @@ public:
 		chunk->generate();
 		chunk->disableHiddenCubes();
 		chunk->toVbos();
+		chunk->vbo = true;
 		toVBOs.push(chunk);
 	}
 	
@@ -620,6 +612,7 @@ public:
 		glDisable(GL_BLEND);
 		//Dessiner les chunks opaques
 		lock.lock();
+		++locknumber;
 		for (int i = 0; i < listChunks.size(); ++i) {
 		
 			MChunk * chunk = listChunks[i];
@@ -654,6 +647,7 @@ public:
 			}
 		}
 		lock.unlock();
+		--locknumber;
 	}
 
 	/**
