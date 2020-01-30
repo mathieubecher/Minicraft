@@ -101,6 +101,9 @@
     <ClInclude Include="src\MCubes.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="src\smartPerlin.h">
+      <Filter>Fichiers d%27en-tête\engine\noise</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">

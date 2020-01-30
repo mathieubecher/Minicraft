@@ -32,7 +32,7 @@ public:
 	static const int MAT_SIZE = 3; //en nombre de chunks
 #endif // DEBUG
 
-	static const int MAT_HEIGHT = 3; //en nombre de chunks
+	static const int MAT_HEIGHT = 1; //en nombre de chunks
 	static const int MAT_SIZE_CUBES = (MAT_SIZE * MCubes::CHUNK_SIZE);
 	static const int MAT_HEIGHT_CUBES = (MAT_HEIGHT * MCubes::CHUNK_HEIGHT);
 	static const int MAT_SIZE_METERS = (MAT_SIZE * MCubes::CHUNK_SIZE * MCube::CUBE_SIZE);
@@ -41,7 +41,7 @@ public:
 	static const int PERLINBOTTONBASE = 40;
 	static const int PERLINHEIGHTBASE = 100;
 	static const int RADIUS = 2;
-	static const int RADIUSDRAW = 5;
+	static const int RADIUSDRAW = 4;
 
 	std::vector<MChunk *> listChunks;
 
@@ -64,11 +64,7 @@ public:
 
 		srand(seed);
 
-		MCubes::Perlin.setFreq(0.015f);
-		MCubes::Perlin1.setFreq(0.02f);
-		MCubes::Perlin2.setFreq(0.04f);
-		MCubes::PerlinBottom.setFreq(0.005f);
-		MCubes::PerlinHeight.setFreq(0.01f);
+		MCubes::Perlin.setFreq(0.02f);
 
 	}
 	// Récupération du cube xyz
@@ -210,18 +206,19 @@ public:
 
 	YVec3<int> camChunk;
 	bool updateCampos = false;
-
+	YVec3f campos;
 	// ADAPTE LENVIRONNEMENT A LA NOUVELLE POSITION DE LA CAMERA
 	void updateCam() {
-		YVec3f campos = mainCamera->Position;
-		YVec3<int> last = camChunk;
-		camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
-		updateCampos = camChunk == last;
-		if (updateCampos) {
-			waitLoadder.notify_one();
-			waitPhysicer.notify_one();
+		if((campos - mainCamera->Position).getSize() > MCubes::CHUNK_SIZE){
+			YVec3f campos = mainCamera->Position;
+			YVec3<int> last = camChunk;
+			camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
+			updateCampos = camChunk == last;
+			if (updateCampos) {
+				waitLoadder.notify_one();
+				waitPhysicer.notify_one();
+			}
 		}
-	
 
 	}
 	void LoadVBO() {
@@ -261,10 +258,12 @@ public:
 		while (neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast)?RADIUS:RADIUSDRAW)) {
 
 			
-			vector<thread*> t;
+			//vector<thread*> t;
 			lockNeighbour.lock();
 			++neighbournumber;
+			/*
 			while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast) ? RADIUS : RADIUSDRAW)) {
+			*/
 				lockNeighbour.unlock();
 				--neighbournumber;
 				lockNeighbour.lock();
@@ -273,20 +272,20 @@ public:
 				neighbours.pop_front();
 				lockNeighbour.unlock();
 				--neighbournumber;
-				t.push_back(new std::thread([this,next]() {
+				//t.push_back(new std::thread([this,next]() {
 					addChunk((int)next.X, (int)next.Y, (int)next.Z);
 
-				}));
+				//}));
 
 				// Tri du tableau
 				lockNeighbour.lock();
 				++neighbournumber;
 				neighbours.sort([this](const YVec3<int> & a, YVec3<int> & b) { return compareChunk(a, b); });
 				while (neighbours.size() > 1000) neighbours.pop_back();
-			}
+			//}
 			lockNeighbour.unlock();
 			--neighbournumber;
-			for (int i = 0; i < t.size(); ++i) t[i]->join();
+			//for (int i = 0; i < t.size(); ++i) t[i]->join();
 			
 		}
 	}

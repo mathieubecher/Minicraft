@@ -60,9 +60,10 @@ public :
 	static const int CUBE_DRAW_BIT = 0x80;
 
 	private :
-		uint8 _Code; //premier bit si on doit le draw ou pas, le reste un des 127 types
+		
 		
 	public :
+		uint8 _Code; //premier bit si on doit le draw ou pas, le reste un des 127 types
 		YVec3f _NavDir;
 		static const int CUBE_SIZE = 2;
 		
@@ -77,6 +78,10 @@ public :
 			_Code = (uint8)type;
 			setDraw(draw);
 		}
+		void setType(uint8 * type) {
+			_Code =*type;
+		}
+
 
 		MCubeType getType(void){
 			return (MCubeType)(_Code & ~CUBE_DRAW_BIT);

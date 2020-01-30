@@ -24,41 +24,38 @@ public:
 	bool resetSeed = false; 
 
 	void WriteChunk() {
-		// auto start = std::chrono::system_clock::now();
-		// Some computation here
+		//auto start = std::chrono::system_clock::now();
 		MCubes * cubes = dynamic_cast<MCubes*>(_Cubes);
 
 		uint8* buffer = new uint8[MCubes::CHUNK_SIZE * MCubes::CHUNK_SIZE * MCubes::CHUNK_HEIGHT*4];
 		
-		MCube::MCubeType cubeType = cubes->_Cubes[0][0][0].getType();
+		uint8 cubeType = cubes->_Cubes[0][0][0]._Code;
+		//*
 		uint16 nbOccur = 0;
-		int allCase = 0;
+		bool endnull;
+		bool basenull;
 		int posInFile = -1;
 		for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z)
 			for (int y = 0; y < MCubes::CHUNK_SIZE; ++y) {
 				for (int x = 0; x < MCubes::CHUNK_SIZE; ++x) {
-					++allCase;
-					if (cubes->_Cubes[x][y][z].getType() == cubeType) ++nbOccur;
-
-
-					if((cubes->_Cubes[x][y][z].getType() != cubeType || nbOccur == 0xFFFF) || (z+1 == MCubes::CHUNK_HEIGHT && y + 1 == MCubes::CHUNK_SIZE && x + 1 == MCubes::CHUNK_SIZE) ) {
-						bool endnull = (nbOccur & 0xFF00) == 0x0000;
-						bool basenull = (nbOccur & 0x00FF) == 0x0000;
-
-						uint8 occurInfo = 0x80 | ((basenull)? 0x00 : 0x01) | ((endnull)? 0x00 : 0x02);
+					if ((cubes->_Cubes[x][y][z]._Code != cubeType || nbOccur == 0xFFFF) || (z + 1 == MCubes::CHUNK_HEIGHT && y + 1 == MCubes::CHUNK_SIZE && x + 1 == MCubes::CHUNK_SIZE)) {
+						if (z + 1 == MCubes::CHUNK_HEIGHT && y + 1 == MCubes::CHUNK_SIZE && x + 1 == MCubes::CHUNK_SIZE) ++nbOccur;
+						endnull = (nbOccur & 0xFF00) == 0x0000;
+						basenull = (nbOccur & 0x00FF) == 0x0000;
 						buffer[++posInFile] = (MCube::MCubeType)cubeType;
-						buffer[++posInFile] = occurInfo;
-						
-						buffer[++posInFile] = (!endnull) ? (nbOccur >> 8) : 0xff;
-						buffer[++posInFile] = (!basenull) ? nbOccur: 0xff;
+						buffer[++posInFile] = 0x80 | basenull | (endnull << 1);
+						++posInFile;
+						if (!endnull) buffer[posInFile] = nbOccur >> 8;
+						++posInFile;
+						if (!basenull) buffer[posInFile] = nbOccur;
 
-						if (nbOccur < 0xFFFF) nbOccur = 1;
-						else nbOccur = 0;
-						cubeType = cubes->_Cubes[x][y][z].getType();
+						nbOccur = 0;
+						cubeType = (MCube::MCubeType)cubes->_Cubes[x][y][z]._Code;
 					}
-					
+					++nbOccur;
 				}
 			}
+
 		buffer[++posInFile] = 0x00;
 
 		string path = ToPath(_XPos, _YPos, _ZPos);
@@ -69,48 +66,50 @@ public:
 		buffer[posInFile] = 0x01;
 		delete[] buffer;
 		myfile.close();
+
+		//auto end = std::chrono::system_clock::now();
+		//std::chrono::duration<double> time = end - start;
+		//std::cout << time.count() * 1000 << endl;
 	}
 
 	void ReadChunk() {
 		if (Exist(_XPos, _YPos, _ZPos)) {
 			MCubes * cubes = dynamic_cast<MCubes*>(_Cubes);
-			// auto start = std::chrono::system_clock::now();
+			auto start = std::chrono::system_clock::now();
 
 			ifstream myfile(ToPath(_XPos, _YPos, _ZPos), std::ifstream::binary);
 			std::filebuf* pbuf = myfile.rdbuf();
-			uint16 size = pbuf->pubseekoff(0, myfile.end, myfile.in);
+			int size = pbuf->pubseekoff(0, myfile.end, myfile.in);
 			pbuf->pubseekpos(0, myfile.in);
 			uint8* buffer = new uint8[size];
 			pbuf->sgetn((char*)buffer, size);
 			myfile.close();
+			auto fileopen = std::chrono::system_clock::now();
 
-			int posInFile = 0;
-			MCube::MCubeType cubeType;
+			int posInFile = -1;
+			uint8 cubeType;
 			uint16 nbOccur = 0;
+			uint8 occurinfo;
 
 			for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z)
 				for (int y = 0; y < MCubes::CHUNK_SIZE; ++y) {
 					for (int x = 0; x < MCubes::CHUNK_SIZE; ++x) {
-
-						
 						if (nbOccur == 0) {
-							cubeType = (MCube::MCubeType)buffer[posInFile];
+							cubeType = (MCube::MCubeType)buffer[++posInFile];
+							occurinfo = buffer[++posInFile];
 							++posInFile;
-							uint8 occurinfo = buffer[posInFile];
+							if ((occurinfo & 2) == 0) nbOccur = buffer[posInFile] << 8;
 							++posInFile;
-							nbOccur = ((occurinfo & 2) == 0x02) ? buffer[posInFile] << 8 : 0x00;
-							++posInFile;
-							nbOccur |= ((occurinfo & 1) == 0x01) ? buffer[posInFile] : 0x00;
-							++posInFile;
+							if ((occurinfo & 1) == 0) nbOccur |= buffer[posInFile];
 						}
-
 						nbOccur--;
-						cubes->_Cubes[x][y][z].setType(cubeType);
+						cubes->_Cubes[x][y][z]._Code= cubeType;
 					}
 				}
-			
-
 			delete[] buffer;
+			auto end = std::chrono::system_clock::now();
+			std::chrono::duration<double> time = end - start;
+			std::cout << time.count() * 1000 << endl;
 		}
 	}
 	static bool Exist(int x, int y, int z) {
@@ -173,7 +172,6 @@ public:
 		if (Voisins[YNEXT] != NULL) Voisins[YNEXT]->Voisins[YPREV] = NULL;
 		if (Voisins[ZPREV] != NULL) Voisins[ZPREV]->Voisins[ZNEXT] = NULL;
 		if (Voisins[ZNEXT] != NULL) Voisins[ZNEXT]->Voisins[ZPREV] = NULL;
-		cout << "end destroy chunk " << _XPos << _YPos << _ZPos << endl;
 	}
 	bool SetHide(YVec3f pos, YVec3f dir) {
 		hide = Hide(pos, dir);
@@ -239,7 +237,7 @@ public:
 		else {
 			reset();
 			_Cubes->generate(_XPos, _YPos, _ZPos);
-			WriteChunk();
+			if (!resetSeed) WriteChunk();
 		}
 		physic = true;
 	}
@@ -347,14 +345,18 @@ public:
 
 	//Permet de compter les triangles ou des les ajouter aux VBO
 	void foreachVisibleTriangle(bool countOnly, int * nbVertOpaque, int * nbVertTransp, YVbo * VboOpaque, YVbo * VboTrasparent) {
+		//auto start = std::chrono::system_clock::now();
 		int iVerticeOpaque = 0;
 		int iVerticeTransp = 0;
 		for (int x = 0; x < MCubes::CHUNK_SIZE; ++x)
 			for (int y = 0; y < MCubes::CHUNK_SIZE; ++y)
 				for (int z = 0; z < MCubes::CHUNK_HEIGHT; ++z) {
-					MCube cube = *(_Cubes->get(x, y,z));
-					bool opaque = cube.isOpaque();
-					if (cube.getDraw() ) {
+					uint8 cube = _Cubes->get(x, y,z)->_Code & ~MCube::CUBE_DRAW_BIT;
+					bool draw = _Cubes->get(x, y, z)->_Code & MCube::CUBE_DRAW_BIT ? true : false;
+					
+					if (draw ) {
+						bool opaque = cube != MCube::CUBE_AIR && cube != MCube::CUBE_EAU && cube != MCube::CUBE_VERRE && cube != MCube::CUBE_BRANCHES;
+						bool transparent = (cube == MCube::CUBE_EAU || cube == MCube::CUBE_VERRE);
 						if (countOnly) {
 							
 							int _NbVert = 0;
@@ -365,70 +367,56 @@ public:
 							if (x - 1 < 0 || (opaque &&  _Cubes->get(x - 1,y,z)->isTransparent() || !opaque && !_Cubes->get(x - 1,y,z)->isPickable())) _NbVert += 6;
 							if (x + 1 >= MCubes::CHUNK_SIZE || (opaque &&  _Cubes->get(x + 1,y,z)->isTransparent() || !opaque && !_Cubes->get(x + 1,y,z)->isPickable())) _NbVert += 6;
 
-							if (cube.isTransparent())
+							if (transparent)
 								*nbVertTransp += _NbVert;
 							else
 								*nbVertOpaque += _NbVert;
 
 						}
 						else {
-							// XY
 							int iVertice = iVerticeOpaque;
-							if (cube.isTransparent())iVertice = iVerticeTransp;
+							if (transparent)iVertice = iVerticeTransp;
 							YVec3f size(1, 1, 1);
-							if (!cube.isSolid() && (z>=MCubes::CHUNK_HEIGHT || !_Cubes->get(x,y,z+1)->isPickable())) size.Z = 0.9f;
+							if (transparent && (z>=MCubes::CHUNK_HEIGHT || !_Cubes->get(x,y,z+1)->isPickable())) size.Z = 0.9f;
+							YVec3f a = YVec3f(x, y, z);
+							YVec3f b = YVec3f(x, y + size.Y, z);
+							YVec3f c = YVec3f(x + size.X, y + size.Y, z);
+							YVec3f d = YVec3f(x + size.X, y, z);
+							YVec3f e = YVec3f(x, y + size.Y, z + size.Z);
+							YVec3f f = YVec3f(x, y, z + size.Z);
+							YVec3f g = YVec3f(x + size.X, y, z + size.Z);
+							YVec3f h = YVec3f(x + size.X, y + size.Y, z + size.Z);
 
+							// XY
 							if(z - 1 < 0 || (opaque &&  _Cubes->get(x, y, z - 1)->isTransparent() || !opaque && !_Cubes->get(x,y,z - 1)->isPickable())){
-								YVec3f a = YVec3f(x, y, z);
-								YVec3f b = YVec3f(x, y + size.Y, z);
-								YVec3f c = YVec3f(x + size.X, y + size.Y, z);
-								YVec3f d = YVec3f(x + size.X, y, z);
-								iVertice += addQuadToVbo((!cube.isTransparent()) ? VboOpaque : VboTrasparent, iVertice, a, b, c, d, cube.getType(), MCubeType::BOTTOM);
+								iVertice += addQuadToVbo((!transparent) ? VboOpaque : VboTrasparent, iVertice, a, b, c, d, cube, MCubeType::BOTTOM);
 							}
 							if (z + 1 >= MCubes::CHUNK_HEIGHT || (opaque &&  _Cubes->get(x,y,z + 1)->isTransparent() || !opaque && !_Cubes->get(x,y,z + 1)->isPickable())) {
-								YVec3f b = YVec3f(x, y, z + size.Z);
-								YVec3f c = YVec3f(x + size.X, y, z + size.Z);
-								YVec3f d = YVec3f(x + size.X, y + size.Y, z + size.Z);
-								YVec3f a = YVec3f(x, y + size.Y, z + size.Z);
-								iVertice += addQuadToVbo((!cube.isTransparent()) ? VboOpaque : VboTrasparent, iVertice, a, b, c, d, cube.getType(), MCubeType::TOP);
+								iVertice += addQuadToVbo((!transparent) ? VboOpaque : VboTrasparent, iVertice, e, f, g, h, cube, MCubeType::TOP);
 							}
 
 							// XZ
 							if (y - 1 < 0 || (opaque &&  _Cubes->get(x,y - 1,z)->isTransparent() || !opaque &&  !_Cubes->get(x,y - 1,z)->isPickable())) {
-								YVec3f a = YVec3f(x, y, z);
-								YVec3f b = YVec3f(x + size.X, y, z);
-								YVec3f c = YVec3f(x + size.X, y, z + size.Z);
-								YVec3f d = YVec3f(x, y, z + size.Z);
-								iVertice += addQuadToVbo((!cube.isTransparent()) ? VboOpaque : VboTrasparent, iVertice, a, b, c, d, cube.getType(), MCubeType::SIDE);
+								iVertice += addQuadToVbo((!transparent) ? VboOpaque : VboTrasparent, iVertice, a, d, g, f, cube, MCubeType::SIDE);
 							}
 							if (y + 1 >= MCubes::CHUNK_SIZE || (opaque &&  _Cubes->get(x,y + 1,z)->isTransparent() || !opaque && !_Cubes->get(x,y + 1,z)->isPickable())) {
-								YVec3f b = YVec3f(x, y + size.Y, z);
-								YVec3f c = YVec3f(x, y + size.Y, z + size.Z);
-								YVec3f d = YVec3f(x + size.X, y + size.Y, z + size.Z);
-								YVec3f a = YVec3f(x + size.X, y + size.Y, z);
-								iVertice += addQuadToVbo((!cube.isTransparent()) ? VboOpaque : VboTrasparent, iVertice, a, b, c, d, cube.getType(), MCubeType::SIDE);
+								iVertice += addQuadToVbo((!transparent) ? VboOpaque : VboTrasparent, iVertice, c, b, e, h, cube, MCubeType::SIDE);
 							}
 							// YZ
-							if (x - 1 < 0 || (opaque &&  _Cubes->get(x - 1,y,z)->isTransparent() || !opaque && !_Cubes->get(x - 1,y,z)->isPickable())) {
-								YVec3f b = YVec3f(x, y, z);
-								YVec3f c = YVec3f(x, y, z + size.Z);
-								YVec3f d = YVec3f(x, y + size.Y, z + size.Z);
-								YVec3f a = YVec3f(x, y + size.Y, z);
-								iVertice += addQuadToVbo((!cube.isTransparent()) ? VboOpaque : VboTrasparent, iVertice, a, b, c, d, cube.getType(), MCubeType::SIDE);
+							if (x - 1 < 0 || (opaque &&  _Cubes->get(x - 1,y,z)->isTransparent() || !opaque && !_Cubes->get(x - 1,y,z)->isPickable())) {								
+								iVertice += addQuadToVbo((!transparent) ? VboOpaque : VboTrasparent, iVertice, b, a, f, e, cube, MCubeType::SIDE);
 							}
 							if (x + 1 >= MCubes::CHUNK_SIZE || (opaque &&  _Cubes->get(x + 1,y,z)->isTransparent() || !opaque && !_Cubes->get(x + 1,y,z)->isPickable())) {
-								YVec3f a = YVec3f(x + size.X, y, z);
-								YVec3f b = YVec3f(x + size.X, y + size.Y, z);
-								YVec3f c = YVec3f(x + size.X, y + size.Y, z + size.Z);
-								YVec3f d = YVec3f(x + size.X, y, z + size.Z);
-								iVertice += addQuadToVbo((!cube.isTransparent()) ? VboOpaque : VboTrasparent, iVertice, a, b, c, d, cube.getType(), MCubeType::SIDE);
+								iVertice += addQuadToVbo((!transparent) ? VboOpaque : VboTrasparent, iVertice, d, c, h, g, cube, MCubeType::SIDE);
 							}
-							if (cube.isTransparent())iVerticeTransp = iVertice;
+							if (transparent)iVerticeTransp = iVertice;
 							else iVerticeOpaque = iVertice;
 						}
 					}
 				}
-		//if(!countOnly) cout << "[Cubes Opaques : " << iVerticeOpaque << "/" << *nbVertOpaque << " ; Cubes Transparents : " << iVerticeTransp << "/" << *nbVertTransp << "]" << endl;
+		//auto end = std::chrono::system_clock::now();
+		//std::chrono::duration<double> time = end - start;
+		//std::cout << time.count() * 1000 << endl;
 	}
 
 	/*
