@@ -32,7 +32,7 @@ public:
 	static const int MAT_SIZE = 3; //en nombre de chunks
 #endif // DEBUG
 
-	static const int MAT_HEIGHT = 1; //en nombre de chunks
+	static const int MAT_HEIGHT = 3; //en nombre de chunks
 	static const int MAT_SIZE_CUBES = (MAT_SIZE * MCubes::CHUNK_SIZE);
 	static const int MAT_HEIGHT_CUBES = (MAT_HEIGHT * MCubes::CHUNK_HEIGHT);
 	static const int MAT_SIZE_METERS = (MAT_SIZE * MCubes::CHUNK_SIZE * MCube::CUBE_SIZE);
@@ -70,13 +70,36 @@ public:
 	// Récupération du cube xyz
 	inline MCube * getCube(int x, int y, int z)
 	{
+		if (actualChunk) {
+			return recursiveGetCube(actualChunk, YVec3<int>(), YVec3<int>(x % MCubes::CHUNK_SIZE,y % MCubes::CHUNK_SIZE,z % MCubes::CHUNK_HEIGHT));
+		}
 		int Xchunk = (int)floor(x / MCubes::CHUNK_SIZE), Ychunk = (int)floor(y / MCubes::CHUNK_SIZE), Zchunk = (int)floor(z / MCubes::CHUNK_HEIGHT);
 		for (auto chunk : listChunks) {
 			if (Xchunk == chunk->_XPos && Ychunk == chunk->_YPos && Zchunk == chunk->_ZPos) return chunk->_Cubes->get(x % MCubes::CHUNK_SIZE,y % MCubes::CHUNK_SIZE,z % MCubes::CHUNK_HEIGHT);
 		}
 		return &MCube::Air;
 	}
+	MChunk * actualChunk;
+	inline MCube  * recursiveGetCube(MChunk * actual, YVec3<int> chunkPos, YVec3<int> posInChunk) {
+		if (actual->_XPos == chunkPos.X && actual->_YPos == chunkPos.Y && actual->_ZPos == chunkPos.Z) 
+			return actual->_Cubes->get(posInChunk.X, posInChunk.Y, posInChunk.Z);
+		
+		if (actual->_XPos < chunkPos.X && actual->Voisins[MChunk::Voisin::XNEXT] != NULL) 
+			return recursiveGetCube(actual->Voisins[MChunk::Voisin::XNEXT],chunkPos,posInChunk);
+		if (actual->_XPos > chunkPos.X && actual->Voisins[MChunk::Voisin::XPREV] != NULL)
+			return recursiveGetCube(actual->Voisins[MChunk::Voisin::XPREV], chunkPos, posInChunk);
 
+		if (actual->_YPos < chunkPos.Y && actual->Voisins[MChunk::Voisin::YNEXT] != NULL)
+			return recursiveGetCube(actual->Voisins[MChunk::Voisin::YNEXT], chunkPos, posInChunk);
+		if (actual->_YPos > chunkPos.Y && actual->Voisins[MChunk::Voisin::YPREV] != NULL)
+			return recursiveGetCube(actual->Voisins[MChunk::Voisin::YPREV], chunkPos, posInChunk);
+
+		if (actual->_ZPos < chunkPos.Z && actual->Voisins[MChunk::Voisin::ZNEXT] != NULL)
+			return recursiveGetCube(actual->Voisins[MChunk::Voisin::ZNEXT], chunkPos, posInChunk);
+		if (actual->_ZPos > chunkPos.Z && actual->Voisins[MChunk::Voisin::ZPREV] != NULL)
+			return recursiveGetCube(actual->Voisins[MChunk::Voisin::ZPREV], chunkPos, posInChunk);
+		&MCube::Air;
+	}
 
 	void updateCube(int x, int y, int z)
 	{
@@ -135,14 +158,11 @@ public:
 		// DEBUT DU THREAD QUI GERE LES CHUNK
 		loadder = std::thread([this]() {
 			while (!deleteLoadder) {
-
 				if (updateCampos) {
-					
 					updateCampos = false;
 					loadNearChunk();
 				}
-				std::unique_lock<std::mutex> lck(mtxloadder);
-				waitLoadder.wait(lck);
+				std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			}
 		});
 
@@ -196,8 +216,7 @@ public:
 					
 					}
 				}
-				std::unique_lock<std::mutex> lck(mtxloadder);
-				waitLoadder.wait(lck);
+				std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			}
 			
 		});
@@ -210,17 +229,54 @@ public:
 	// ADAPTE LENVIRONNEMENT A LA NOUVELLE POSITION DE LA CAMERA
 	void updateCam() {
 		if((campos - mainCamera->Position).getSize() > MCubes::CHUNK_SIZE){
-			YVec3f campos = mainCamera->Position;
+			campos = mainCamera->Position;
+			if(actualChunk) refreshActualChunk(campos);
+			updateCampos = true;
+			//cout << actualChunk->_XPos << " " << actualChunk->_YPos << " " << actualChunk->_ZPos << endl;
 			YVec3<int> last = camChunk;
 			camChunk = YVec3<int>((int)floor(campos.X / MCubes::CHUNK_SIZE), (int)floor(campos.Y / MCubes::CHUNK_SIZE), (int)floor(campos.Z / MCubes::CHUNK_HEIGHT));
-			updateCampos = camChunk == last;
-			if (updateCampos) {
-				waitLoadder.notify_one();
-				waitPhysicer.notify_one();
-			}
 		}
-
+		
 	}
+	bool refreshActualChunk(YVec3f campos) {
+		bool findactual = false;
+		//cout << MCubes::CHUNK_SIZE * MAT_SIZE << " " << MCubes::CHUNK_SIZE * MAT_HEIGHT;
+		if (campos.X >= 0 && campos.X < MCubes::CHUNK_SIZE * MAT_SIZE &&
+			campos.Y >= 0 && campos.Y < MCubes::CHUNK_SIZE * MAT_SIZE &&
+			campos.Z >= 0 && campos.Z < MCubes::CHUNK_SIZE * MAT_HEIGHT)
+		{
+			while (actualChunk && !(campos.X >= actualChunk->_XPos * MCubes::CHUNK_SIZE  && campos.X < (actualChunk->_XPos + 1) * MCubes::CHUNK_SIZE &&
+				campos.Y >= actualChunk->_YPos * MCubes::CHUNK_SIZE  && campos.Y < (actualChunk->_YPos + 1) * MCubes::CHUNK_SIZE &&
+				campos.Z >= actualChunk->_ZPos * MCubes::CHUNK_SIZE  && campos.Z < (actualChunk->_ZPos + 1) * MCubes::CHUNK_SIZE)) {
+				if ((int)floor(campos.X / MCubes::CHUNK_SIZE) < actualChunk->_XPos) {
+					actualChunk = actualChunk->Voisins[MChunk::Voisin::XPREV];
+					findactual = true;
+				}
+				else if ((int)floor(campos.Y / MCubes::CHUNK_SIZE) < actualChunk->_YPos) {
+					actualChunk = actualChunk->Voisins[MChunk::Voisin::YPREV];
+					findactual = true;
+				}
+				else if ((int)floor(campos.Z / MCubes::CHUNK_SIZE) < actualChunk->_ZPos) {
+					actualChunk = actualChunk->Voisins[MChunk::Voisin::ZPREV];
+					findactual = true;
+				}
+				else if ((int)floor(campos.X / MCubes::CHUNK_SIZE) > actualChunk->_XPos) {
+					actualChunk = actualChunk->Voisins[MChunk::Voisin::XNEXT];
+					findactual = true;
+				}
+				else if ((int)floor(campos.Y / MCubes::CHUNK_SIZE) > actualChunk->_YPos) {
+					actualChunk = actualChunk->Voisins[MChunk::Voisin::YNEXT];
+					findactual = true;
+				}
+				else if ((int)floor(campos.Z / MCubes::CHUNK_SIZE) > actualChunk->_ZPos) {
+					actualChunk = actualChunk->Voisins[MChunk::Voisin::ZNEXT];
+					findactual = true;
+				}
+			}
+			return findactual;
+		} return false;
+	}
+
 	void LoadVBO() {
 		if (toVBOs.size() > 0) {
 			loadNewVBO();
@@ -258,11 +314,11 @@ public:
 		while (neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast)?RADIUS:RADIUSDRAW)) {
 
 			
-			vector<thread*> t;
+			//vector<thread*> t;
 			lockNeighbour.lock();
 			++neighbournumber;
 			
-			while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast) ? RADIUS : RADIUSDRAW)) {
+			//while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast) ? RADIUS : RADIUSDRAW)) {
 			
 				lockNeighbour.unlock();
 				--neighbournumber;
@@ -272,17 +328,17 @@ public:
 				neighbours.pop_front();
 				lockNeighbour.unlock();
 				--neighbournumber;
-				t.push_back(new std::thread([this,next]() {
+				//t.push_back(new std::thread([this,next]() {
 					addChunk((int)next.X, (int)next.Y, (int)next.Z);
 
-				}));
+				//}));
 
 				// Tri du tableau
 				lockNeighbour.lock();
 				++neighbournumber;
 				neighbours.sort([this](const YVec3<int> & a, YVec3<int> & b) { return compareChunk(a, b); });
 				while (neighbours.size() > 1000) neighbours.pop_back();
-			}
+			//}
 			lockNeighbour.unlock();
 			--neighbournumber;
 			//for (int i = 0; i < t.size(); ++i) t[i]->join();
@@ -303,7 +359,7 @@ public:
 		generateChunk(chunk);
 
 		if(chunk){
-
+			if (!actualChunk) actualChunk = chunk;
 			SetNeighboursChunk(chunk);
 
 			lock.lock();
