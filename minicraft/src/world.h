@@ -258,12 +258,12 @@ public:
 		while (neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast)?RADIUS:RADIUSDRAW)) {
 
 			
-			//vector<thread*> t;
+			vector<thread*> t;
 			lockNeighbour.lock();
 			++neighbournumber;
-			/*
+			
 			while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast) ? RADIUS : RADIUSDRAW)) {
-			*/
+			
 				lockNeighbour.unlock();
 				--neighbournumber;
 				lockNeighbour.lock();
@@ -272,17 +272,17 @@ public:
 				neighbours.pop_front();
 				lockNeighbour.unlock();
 				--neighbournumber;
-				//t.push_back(new std::thread([this,next]() {
+				t.push_back(new std::thread([this,next]() {
 					addChunk((int)next.X, (int)next.Y, (int)next.Z);
 
-				//}));
+				}));
 
 				// Tri du tableau
 				lockNeighbour.lock();
 				++neighbournumber;
 				neighbours.sort([this](const YVec3<int> & a, YVec3<int> & b) { return compareChunk(a, b); });
 				while (neighbours.size() > 1000) neighbours.pop_back();
-			//}
+			}
 			lockNeighbour.unlock();
 			--neighbournumber;
 			//for (int i = 0; i < t.size(); ++i) t[i]->join();

@@ -42,14 +42,8 @@
     <Filter Include="Fichiers d%27en-tête\engine\render">
       <UniqueIdentifier>{75d7c323-8b30-4ce8-97d7-f825373fcbfa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers d%27en-tête\input">
-      <UniqueIdentifier>{fffcc36d-a5e8-4ba5-88e3-67d7b72a2835}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Fichiers sources\utils">
-      <UniqueIdentifier>{173f9ef2-9b7a-4c78-a492-59a254c0f359}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Fichiers d%27en-tête\engine\utils">
-      <UniqueIdentifier>{e71984fc-dd3f-4576-83f1-dde3dab01906}</UniqueIdentifier>
+      <UniqueIdentifier>{8bcc47a7-7c95-4737-85f1-ccaf497fbb08}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -74,8 +68,20 @@
     <ClInclude Include="..\src\engine\render\camera.h">
       <Filter>Fichiers d%27en-tête\engine\render</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\engine\utils\utils.h">
-      <Filter>Fichiers d%27en-tête\engine\utils</Filter>
+    <ClInclude Include="src\smartPerlin.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\atlasMap.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Inputs.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MCubes.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="..\src\engine\utils\timer.h">
       <Filter>Fichiers d%27en-tête\engine\utils</Filter>
@@ -86,23 +92,8 @@
     <ClInclude Include="..\src\engine\utils\types_3d.h">
       <Filter>Fichiers d%27en-tête\engine\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\engine\render\tex_manager.h">
-      <Filter>Fichiers d%27en-tête\engine\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Inputs.h">
-      <Filter>Fichiers d%27en-tête\input</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Input.h">
-      <Filter>Fichiers d%27en-tête\input</Filter>
-    </ClInclude>
-    <ClInclude Include="src\atlasMap.h">
-      <Filter>Fichiers d%27en-tête\engine\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MCubes.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="src\smartPerlin.h">
-      <Filter>Fichiers d%27en-tête\engine\noise</Filter>
+    <ClInclude Include="..\src\engine\utils\utils.h">
+      <Filter>Fichiers d%27en-tête\engine\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -116,7 +107,7 @@
       <Filter>Fichiers sources\render</Filter>
     </ClCompile>
     <ClCompile Include="..\src\engine\utils\utils.cpp">
-      <Filter>Fichiers sources\utils</Filter>
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClInclude Include="..\src\engine\noise\perlin.h" />
     <ClInclude Include="..\src\engine\render\camera.h" />
-    <ClInclude Include="..\src\engine\render\tex_manager.h" />
     <ClInclude Include="..\src\engine\utils\timer.h" />
     <ClInclude Include="..\src\engine\utils\types.h" />
     <ClInclude Include="..\src\engine\utils\types_3d.h" />

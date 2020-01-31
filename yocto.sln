@@ -7,8 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine_test", "engine_test\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minicraft", "minicraft\minicraft.vcxproj", "{17FD557D-42BC-4AF9-ABD2-025A8F8A621D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NewMiniCraft", "NewMiniCraft\NewMiniCraft.vcxproj", "{67D34286-B66B-4744-BD6B-E6BE29AE2008}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,14 +31,6 @@ Global
 		{17FD557D-42BC-4AF9-ABD2-025A8F8A621D}.Release|x64.Build.0 = Release|x64
 		{17FD557D-42BC-4AF9-ABD2-025A8F8A621D}.Release|x86.ActiveCfg = Release|Win32
 		{17FD557D-42BC-4AF9-ABD2-025A8F8A621D}.Release|x86.Build.0 = Release|Win32
-		{67D34286-B66B-4744-BD6B-E6BE29AE2008}.Debug|x64.ActiveCfg = Debug|x64
-		{67D34286-B66B-4744-BD6B-E6BE29AE2008}.Debug|x64.Build.0 = Debug|x64
-		{67D34286-B66B-4744-BD6B-E6BE29AE2008}.Debug|x86.ActiveCfg = Debug|Win32
-		{67D34286-B66B-4744-BD6B-E6BE29AE2008}.Debug|x86.Build.0 = Debug|Win32
-		{67D34286-B66B-4744-BD6B-E6BE29AE2008}.Release|x64.ActiveCfg = Release|x64
-		{67D34286-B66B-4744-BD6B-E6BE29AE2008}.Release|x64.Build.0 = Release|x64
-		{67D34286-B66B-4744-BD6B-E6BE29AE2008}.Release|x86.ActiveCfg = Release|Win32
-		{67D34286-B66B-4744-BD6B-E6BE29AE2008}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
