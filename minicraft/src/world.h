@@ -70,10 +70,11 @@ public:
 	// Récupération du cube xyz
 	inline MCube * getCube(int x, int y, int z)
 	{
+		int Xchunk = (int)floor(x / (float)MCubes::CHUNK_SIZE), Ychunk = (int)floor(y / (float)MCubes::CHUNK_SIZE), Zchunk = (int)floor(z / (float)MCubes::CHUNK_HEIGHT);
+
 		if (actualChunk) {
-			return recursiveGetCube(actualChunk, YVec3<int>(), YVec3<int>(x % MCubes::CHUNK_SIZE,y % MCubes::CHUNK_SIZE,z % MCubes::CHUNK_HEIGHT));
+			return recursiveGetCube(actualChunk, YVec3<int>(Xchunk, Ychunk, Zchunk), YVec3<int>(x % MCubes::CHUNK_SIZE,y % MCubes::CHUNK_SIZE,z % MCubes::CHUNK_HEIGHT));
 		}
-		int Xchunk = (int)floor(x / MCubes::CHUNK_SIZE), Ychunk = (int)floor(y / MCubes::CHUNK_SIZE), Zchunk = (int)floor(z / MCubes::CHUNK_HEIGHT);
 		for (auto chunk : listChunks) {
 			if (Xchunk == chunk->_XPos && Ychunk == chunk->_YPos && Zchunk == chunk->_ZPos) return chunk->_Cubes->get(x % MCubes::CHUNK_SIZE,y % MCubes::CHUNK_SIZE,z % MCubes::CHUNK_HEIGHT);
 		}
@@ -81,8 +82,9 @@ public:
 	}
 	MChunk * actualChunk;
 	inline MCube  * recursiveGetCube(MChunk * actual, YVec3<int> chunkPos, YVec3<int> posInChunk) {
-		if (actual->_XPos == chunkPos.X && actual->_YPos == chunkPos.Y && actual->_ZPos == chunkPos.Z) 
+		if (actual->_XPos == chunkPos.X && actual->_YPos == chunkPos.Y && actual->_ZPos == chunkPos.Z) {
 			return actual->_Cubes->get(posInChunk.X, posInChunk.Y, posInChunk.Z);
+		}
 		
 		if (actual->_XPos < chunkPos.X && actual->Voisins[MChunk::Voisin::XNEXT] != NULL) 
 			return recursiveGetCube(actual->Voisins[MChunk::Voisin::XNEXT],chunkPos,posInChunk);
@@ -314,11 +316,11 @@ public:
 		while (neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast)?RADIUS:RADIUSDRAW)) {
 
 			
-			//vector<thread*> t;
+			vector<thread*> t;
 			lockNeighbour.lock();
 			++neighbournumber;
 			
-			//while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast) ? RADIUS : RADIUSDRAW)) {
+			while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < ((firstCast) ? RADIUS : RADIUSDRAW)) {
 			
 				lockNeighbour.unlock();
 				--neighbournumber;
@@ -328,20 +330,20 @@ public:
 				neighbours.pop_front();
 				lockNeighbour.unlock();
 				--neighbournumber;
-				//t.push_back(new std::thread([this,next]() {
+				t.push_back(new std::thread([this,next]() {
 					addChunk((int)next.X, (int)next.Y, (int)next.Z);
 
-				//}));
+				}));
 
 				// Tri du tableau
 				lockNeighbour.lock();
 				++neighbournumber;
 				neighbours.sort([this](const YVec3<int> & a, YVec3<int> & b) { return compareChunk(a, b); });
 				while (neighbours.size() > 1000) neighbours.pop_back();
-			//}
+			}
 			lockNeighbour.unlock();
 			--neighbournumber;
-			//for (int i = 0; i < t.size(); ++i) t[i]->join();
+			for (int i = 0; i < t.size(); ++i) t[i]->join();
 			
 		}
 	}

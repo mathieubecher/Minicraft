@@ -7,7 +7,7 @@
 #include <sysinfoapi.h>
 #include "Inputs.h"
 #include "world.h"
-
+#include "avatar.h"
 
 class MEngineMinicraft : public YEngine {
 
@@ -31,17 +31,19 @@ public :
 
 	//Shader
 	AtlasMap * atlas;
+	MAvatar * avatar;
 	int SunShader;
 	int CubeShader;
 	int CubeDebugShader;
 	int WorldShader;
+
 
 	// Click State
 	bool rightMouseClick = false;
 	bool wheelMouseClick = false;
 
 	// Input State 
-	Inputs inputs = Inputs();
+	Inputs * inputs = new Inputs();
 	// Camera 
 	float cameraSpeed = 1;
 
@@ -61,7 +63,7 @@ public :
 		YLog::log(YLog::ENGINE_INFO,"Minicraft Started : initialisation");
 
 		Renderer->setBackgroundColor(YColor(0.0f,0.0f,0.0f,1.0f));
-		Renderer->Camera->setPosition(YVec3f(60, 60, 60));
+		Renderer->Camera->setPosition(YVec3f(60, 60, 80));
 		Renderer->Camera->setLookAt(YVec3f(140,140,80));
 		
 		// Load Mesh
@@ -70,15 +72,30 @@ public :
 
 		//Pour créer le monde
 		World = new MWorld();
-		
+		avatar = new MAvatar(Renderer->Camera,World,inputs);
 		World->init_world(0);
 		World->initCam(Renderer->Camera);
 
 	}
-	
-
+	/*
+	bool Move;
+	bool Jump;
+	float Height;
+	float CurrentHeight;
+	float Width;
+	bool avance;
+	bool recule;
+	bool gauche;
+	bool droite;
+	bool Standing;
+	bool InWater;
+	bool Crouch;
+	bool Run;
+	*/
 	void update(float elapsed)
 	{
+		
+		/*
 		YVec3f moveVector = YVec3f(0, 0, 0);
 		if (inputs.Z.press) // Z
 		{
@@ -99,8 +116,9 @@ public :
 		}
 
 		if (moveVector.getSize() > 0) Renderer->Camera->relativeMove(moveVector.normalize() * elapsed * cameraSpeed * ((inputs.Shift.press) ? 50 : 10));
+		*/
+		avatar->update(elapsed);
 		World->updateCam();
-
 		World->LoadVBO();
 	}
 
@@ -125,6 +143,7 @@ public :
 
 		glUseProgram(0);
 		//Rendu des axes
+
 		glDisable(GL_LIGHTING);
 		glBegin(GL_LINES);
 		glColor3d(1, 0, 0);
@@ -136,6 +155,7 @@ public :
 		glColor3d(0, 0, 1);
 		glVertex3d(0, 0, 0);
 		glVertex3d(0,0, 10000);
+		glColor3d(1, 0, 0);
 		glEnd();
 
 		glPushMatrix();
@@ -162,6 +182,19 @@ public :
 		World->render_world_vbo(WorldShader, atlas->terrain, false, false);
 		glPopMatrix();
 
+		glPushMatrix();
+		glUseProgram(SunShader); //Demande au GPU de charger ces shaders
+		GLuint avatarcolor = glGetUniformLocation(SunShader, "sun_color");
+		glUniform3f(avatarcolor, 1,1,1);
+
+		
+		glTranslatef(avatar->Position.X - avatar->Width/2, avatar->Position.Y - avatar->Width / 2, avatar->Position.Z - avatar->CurrentHeight / 2);
+		glScalef(avatar->Width, avatar->Width, avatar->CurrentHeight);
+		Renderer->updateMatricesFromOgl(); //Calcule toute les matrices à partir des deux matrices OGL
+		Renderer->sendMatricesToShader(SunShader); //Envoie les matrices au shader
+		
+		VboCube->render();
+		glPopMatrix();
 		
 	}
 
@@ -174,7 +207,8 @@ public :
 	
 	void keyPressed(int key, bool special, bool down, int p1, int p2) 
 	{	
-		inputs.keyPressed((((special) ? -1 : 1) * (key + ((inputs.Shift.press && !special) ? 32 : 0))), down, p1, p2);
+		inputs->keyPressed((((special) ? -1 : 1) * (key + ((inputs->Shift.press && !special) ? 32 : 0))), down, p1, p2);
+		if (key == 3 && special && down)avatar->fps = !avatar->fps;
 	}
 
 	void mouseWheel(int wheel, int dir, int x, int y, bool inUi)
@@ -202,7 +236,7 @@ public :
 		x = x - (glutGet(GLUT_WINDOW_WIDTH) >> 1);
 		y = y - (glutGet(GLUT_WINDOW_HEIGHT) >> 1);
 		if (rightMouseClick) {
-			if (inputs.Ctrl.press) {
+			if (inputs->Ctrl.press) {
 				Renderer->Camera->rotateAround(x / 500.0f);
 				Renderer->Camera->rotateUpAround(y / 500.0F);
 			}
@@ -213,7 +247,7 @@ public :
 			CenterPointer();
 		}
 		else if (wheelMouseClick) {
-			if (inputs.Ctrl.press) {
+			if (inputs->Ctrl.press) {
 
 				Renderer->Camera->moveWorld(YVec3f( y / 500.0F, x / 500.0F, 0));
 			}

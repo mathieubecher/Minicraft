@@ -8,6 +8,7 @@ public:
 	Input S = Input(115);
 	Input D = Input(100);
 	Input Ctrl = Input(-114);
+	Input Space = Input(32);
 	Input Shift = Input(-112);
 	int count = 5;
 
@@ -15,12 +16,14 @@ public:
 	}
 	void keyPressed(int key, bool down, int p1, int p2)
 	{
-		if (key == Z.keyCode) Z.press = down;
-		else if (key == Q.keyCode) Q.press = down;
-		else if (key == S.keyCode) S.press = down;
-		else if (key == D.keyCode) D.press = down;
-		else if (key == Ctrl.keyCode) Ctrl.press = down;
-		else if (key == Shift.keyCode) Shift.press = down;
+		cout << key << endl;
+		if (key == Z.keyCode) Z.Press(down);
+		else if (key == Q.keyCode) Q.Press(down);
+		else if (key == S.keyCode) S.Press(down);
+		else if (key == D.keyCode) D.Press(down);
+		else if (key == Ctrl.keyCode) Ctrl.Press(down);
+		else if (key == Shift.keyCode) Shift.Press(down);
+		else if (key == Space.keyCode) Space.Press(down);
 	}
 
 

@@ -85,6 +85,7 @@ public:
 	void setPosition(YVec3<float> pos)
 	{
 		Position = pos;
+		LookAt = Position + Direction;
 		updateVecs();
 	}
 

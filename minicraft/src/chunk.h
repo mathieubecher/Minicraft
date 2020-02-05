@@ -75,7 +75,7 @@ public:
 	void ReadChunk() {
 		if (Exist(_XPos, _YPos, _ZPos)) {
 			MCubes * cubes = dynamic_cast<MCubes*>(_Cubes);
-			auto start = std::chrono::system_clock::now();
+			//auto start = std::chrono::system_clock::now();
 
 			ifstream myfile(ToPath(_XPos, _YPos, _ZPos), std::ifstream::binary);
 			std::filebuf* pbuf = myfile.rdbuf();
@@ -84,7 +84,7 @@ public:
 			uint8* buffer = new uint8[size];
 			pbuf->sgetn((char*)buffer, size);
 			myfile.close();
-			auto fileopen = std::chrono::system_clock::now();
+			//auto fileopen = std::chrono::system_clock::now();
 
 			int posInFile = -1;
 			uint8 cubeType;
@@ -107,9 +107,9 @@ public:
 					}
 				}
 			delete[] buffer;
-			auto end = std::chrono::system_clock::now();
-			std::chrono::duration<double> time = end - start;
-			std::cout << time.count() * 1000 << endl;
+			//auto end = std::chrono::system_clock::now();
+			//std::chrono::duration<double> time = end - start;
+			//std::cout << time.count() * 1000 << endl;
 		}
 	}
 	static bool Exist(int x, int y, int z) {

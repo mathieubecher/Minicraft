@@ -65,7 +65,7 @@ public :
 	public :
 		uint8 _Code; //premier bit si on doit le draw ou pas, le reste un des 127 types
 		YVec3f _NavDir;
-		static const int CUBE_SIZE = 2;
+		static const int CUBE_SIZE = 1;
 		
 		MCube()
 		{
