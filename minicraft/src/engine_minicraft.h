@@ -128,8 +128,8 @@ public :
 		SYSTEMTIME s;
 		GetLocalTime(&s);
 		
-		rotateTime = s.wHour + s.wMinute/60;
-
+		//rotateTime = s.wHour + s.wMinute/60;
+		rotateTime = ((s.wSecond+s.wMilliseconds/1000.0f) / 60.0f) * 24;
 		float calculTime = 0;
 		if (rotateTime > 6 && rotateTime <= 19) calculTime = (rotateTime - 6) / 26;
 		else if (rotateTime > 19) calculTime = (rotateTime - 19)/22 + 0.5f;
@@ -159,8 +159,8 @@ public :
 		glEnd();
 
 		glPushMatrix();
-		glTranslatef(-10.5f, std::cos(calculTime *2*3.1415f)*10, std::sin(calculTime *2*3.1415f)*10);
-
+		glTranslatef(-100 + avatar->Position.X, std::cos(calculTime *2*3.1415f)*300 + avatar->Position.Y, std::sin(calculTime *2*3.1415f)*300 + avatar->Position.Z);
+		glScalef(20, 20, 20);
 		
 		// SUN
 		glUseProgram(SunShader); //Demande au GPU de charger ces shaders
@@ -178,8 +178,9 @@ public :
 		glPopMatrix();
 
 		glPushMatrix();
+		
 		//World->render_world_basic(CubeShader,VboCube);
-		World->render_world_vbo(WorldShader, atlas->terrain, false, false);
+		World->render_world_vbo(WorldShader, atlas->terrain, false, false, YVec3f(-0.2f, std::cos(calculTime * 2 * 3.1415f), std::sin(calculTime * 2 * 3.1415f)));
 		glPopMatrix();
 
 		glPushMatrix();
@@ -207,7 +208,7 @@ public :
 	
 	void keyPressed(int key, bool special, bool down, int p1, int p2) 
 	{	
-		inputs->keyPressed((((special) ? -1 : 1) * (key + ((inputs->Shift.press && !special) ? 32 : 0))), down, p1, p2);
+		inputs->keyPressed((((special) ? -1 : 1) * (key + ((inputs->Shift.press && key!=32 && !special) ? 32 : 0))), down, p1, p2);
 		if (key == 3 && special && down)avatar->fps = !avatar->fps;
 	}
 

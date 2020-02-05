@@ -12,7 +12,7 @@ class MAvatar
 public:
 	YVec3f Position;
 	YVec3f Speed;
-
+	static float gravity;
 	bool Move;
 	bool Jump;
 	float Height;
@@ -45,7 +45,7 @@ public:
 		this->inputs = inputs;
 		Height = 1.8f;
 		CurrentHeight = Height;
-		Width = 0.5f;
+		Width = 0.8f;
 		Cam = cam;
 		avance = false;
 		recule = false;
@@ -59,92 +59,50 @@ public:
 		Run = false;
 	}
 
+
 	void update(float elapsed)
 	{
 		if (elapsed > 1.0f / 60.0f)
 			elapsed = 1.0f / 60.0f;
-
+		bool lastwater = InWater;
+		InWater = World->getCube((int)floor(Position.X), (int)floor(Position.Y), (int)floor(Position.Z))->getType() == MCube::CUBE_EAU;
+		lastwater = InWater != lastwater;
 		avance = inputs->Z.press;
 		recule = inputs->S.press;
 		droite = inputs->D.press;
 		gauche = inputs->Q.press;
-		Jump = inputs->Space.press && Standing;
+		Jump = inputs->Space.press;
 		Run = inputs->Shift.press;
+		
+
+		float maxSpeed = 5;
+		if (Run) maxSpeed = 9;
+		if (InWater)maxSpeed = maxSpeed / 2.0f;
+		float acc = maxSpeed * 10;
+		if (!Standing && !InWater) acc = maxSpeed;
 
 
-		//Par defaut, on applique la gravité (-100 sur Z), la moitie si dans l'eau
-		YVec3f force = YVec3f(0, 0, -1) * 9.81f;
-		if (InWater)
-			force = YVec3f(0, 0, -1) * 0.5f;
-
-		float lastheight = CurrentHeight;
-		CurrentHeight = Height;
-		if (Crouch)
-			CurrentHeight = Height / 2;
-
-		//Pour ne pas s'enfoncer dans le sol en une frame quand on se releve
-		if (CurrentHeight > lastheight)
-			Position.Z += Height / 4;
-
-		//Si l'avatar n'est pas au sol, alors il ne peut pas sauter
-		if (!Standing && !InWater) //On jump tout le temps
-			Jump = false;
-
-		float accel = 40;
-		if (Crouch)
-			accel = 20;
-		if (!Standing)
-			accel = 5;
-		if (Run)
-			accel = accel * 2;
-
-		YVec3f forward(Cam->Direction.X, Cam->Direction.Y, 0);
-		forward.normalize();
-		YVec3f right(Cam->RightVec.X, Cam->RightVec.Y, 0);
-		right.normalize();
-
-		//On applique les controles en fonction de l'accélération
-		if (avance)
-			force += forward * accel;
-		if (recule)
-			force += forward * -accel;
-		if (gauche)
-			force += right * accel;
-		if (droite)
-			force += right * -accel;
-
-
-		//On applique le jump
-		if (Jump)
-		{
-			force += YVec3f(0, 0, 1) * 5.0f / elapsed; //(impulsion, pas fonction du temps)
+		YVec3f force = YVec3f(0, 0, 0);
+		if (avance) force += Cam->Direction;
+		if (recule) force -= Cam->Direction;
+		if (droite) force -= Cam->RightVec;
+		if (gauche) force += Cam->RightVec;
+		force.Z = 0;
+		force = force.normalize();
+		force *= acc;
+		
+		if (Jump && ((Standing && !InWater) || lastwater)) {
 			Standing = false;
+			Speed.Z +=8.5f;
+			Speed.X = force.normalize().X * maxSpeed;
+			Speed.Y = force.normalize().Y * maxSpeed;
 		}
 
-		//On applique les forces en fonction du temps écoulé
 		Speed += force * elapsed;
-
-		//On met une limite a sa vitesse horizontale
-		float speedmax = 35;
-		if (Crouch)
-			speedmax =20;
-		if (!Standing)
-			speedmax = 35;
-		if (Run)
-			speedmax = 70;
-
-		YVec3f horSpeed = Speed;
-		horSpeed.Z = 0;
-		if (horSpeed.getSize() > speedmax)
-		{
-			horSpeed.normalize();
-			horSpeed *= speedmax;
-			Speed.X = horSpeed.X;
-			Speed.Y = horSpeed.Y;
-		}
-
-		//On le déplace, en sauvegardant son ancienne position
-		YVec3f oldPosition = Position;
+		float speedheight = Speed.Z;
+		Speed.Z = 0;
+		if (Speed.getSize() > maxSpeed) Speed = Speed.normalize() * maxSpeed;
+		Speed.Z = (InWater)? ((Jump)?1:-1) : speedheight - gravity * elapsed;
 		Position += (Speed * elapsed);
 
 		//YLog::log(YLog::ENGINE_INFO, ("zS " + toString(Speed.Z)).c_str());
@@ -184,38 +142,15 @@ public:
 				}
 			}
 		}
-
-		int x = (int)(Position.X / MCube::CUBE_SIZE);
-		int y = (int)(Position.Y / MCube::CUBE_SIZE);
-		int z = (int)(Position.Z / MCube::CUBE_SIZE);
-
-		//Escaliers
-		float floatheight = 1.0f;
-		float zpied = Position.Z - (Height / 2.0f);
-		float zfloatpied = zpied - floatheight;
-		int izCubeDessousFloat = (int)((zfloatpied) / MCube::CUBE_SIZE);
-		float zCubeDessous2Float = zfloatpied - MCube::CUBE_SIZE;
-		int izCubeDessous2Float = (int)(zCubeDessous2Float / MCube::CUBE_SIZE);
-
-
-		//Si on est dans l'eau
-		InWater = false;
-		if (World->getCube(x, y, z)->getType() == MCube::CUBE_EAU)
-			InWater = true;
-
-
-		// DAMPING
-		if (InWater)
-		{
-			//Standing = true;
-			Speed *= pow(0.2f, elapsed);
+		if (InWater) {
+			Speed *= pow(0.02f, elapsed);
+		}
+		else if (Standing) {
+			Speed *= pow(0.01f, elapsed);
 		}
 
-		if (Standing)
-			Speed *= pow(0.01f, elapsed);
 
-		if(fps)
-		Cam->setPosition(Position + YVec3f(0,0,0.6f));
+		if(fps) Cam->setPosition(Position + YVec3f(0,0,0.6f));
 		else {
 			Cam->setPosition(Position - Cam->Direction * 5);
 			Cam->setLookAt(Position);
@@ -223,5 +158,5 @@ public:
 
 	}
 };
-
+float MAvatar::gravity = 9.81f * 3;
 #endif

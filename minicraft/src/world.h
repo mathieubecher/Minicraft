@@ -659,7 +659,7 @@ public:
 	}
 		
 
-	void render_world_vbo(int shader, YTexFile * texture, bool debug, bool doTransparent)
+	void render_world_vbo(int shader, YTexFile * texture, bool debug, bool doTransparent, YVec3f sunpos)
 	{
 		
 		//add_world_to_vbo();
@@ -679,6 +679,9 @@ public:
 				glPushMatrix();
 				glTranslatef(chunk->_XPos * MCubes::CHUNK_SIZE, chunk->_YPos *MCubes::CHUNK_SIZE, chunk->_ZPos * MCubes::CHUNK_HEIGHT);
 				glUseProgram(shader);
+				GLuint var = glGetUniformLocation(shader, "sun_pos");
+				glUniform3f(var, sunpos.X, sunpos.Y, sunpos.Z);
+
 				YEngine::getInstance()->Renderer->updateMatricesFromOgl(); //Calcule toute les matrices à partir des deux matrices OGL
 				YEngine::getInstance()->Renderer->sendMatricesToShader(shader); //Envoie les matrices au shader
 				texture->setAsShaderInput(shader);

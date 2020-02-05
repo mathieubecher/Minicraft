@@ -105,7 +105,7 @@ public:
 
 					if (perlin > 0.5)
 					{
-						//if(z<64) cube->setType(MCube::CUBE_EAU);
+						if(z<70) cube->setType(MCube::CUBE_EAU);
 						airlevel = 0;
 					}
 					else
