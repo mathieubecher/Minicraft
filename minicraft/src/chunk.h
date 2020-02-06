@@ -135,6 +135,9 @@ public:
 	YVbo * VboOpaque = NULL;
 	YVbo * VboTransparent = NULL;
 
+	YVbo * NewVboOpaque = NULL;
+	YVbo * NewVboTransparent = NULL;
+
 	MChunk * Voisins[6];
 	mutex vboLock;
 
@@ -153,6 +156,7 @@ public:
 	bool draw = false;
 	bool physic = false;
 	bool vbo = false;
+	bool reload = true;
 
 	MChunk(int x, int y, int z) 
 	{
@@ -248,9 +252,37 @@ public:
 	int * nbVertTransp = new int();
 	bool updateVert = true;
 
+	void toNewVbos(void) {
+		//Compter les sommets
+		if (updateVert) {
+			foreachVisibleTriangle(true, nbVertOpaque, nbVertTransp, NewVboOpaque, NewVboTransparent);
+			updateVert = false;
+		}
+		NewVboOpaque = new YVbo(4, (*nbVertOpaque), YVbo::PACK_BY_ELEMENT_TYPE);
+		NewVboTransparent = new YVbo(4, (*nbVertOpaque), YVbo::PACK_BY_ELEMENT_TYPE);
+		//Créer les VBO
+		NewVboOpaque = new YVbo(4, (*nbVertOpaque), YVbo::PACK_BY_ELEMENT_TYPE);
+		NewVboOpaque->setElementDescription(0, YVbo::Element(3)); //Sommet
+		NewVboOpaque->setElementDescription(1, YVbo::Element(3)); //Normale
+		NewVboOpaque->setElementDescription(2, YVbo::Element(2)); //UV
+		NewVboOpaque->setElementDescription(3, YVbo::Element(1)); //Type
+		NewVboOpaque->createVboCpu();
+
+		NewVboTransparent = new YVbo(4, (*nbVertTransp), YVbo::PACK_BY_ELEMENT_TYPE);
+		NewVboTransparent->setElementDescription(0, YVbo::Element(3)); //Sommet
+		NewVboTransparent->setElementDescription(1, YVbo::Element(3)); //Normale
+		NewVboTransparent->setElementDescription(2, YVbo::Element(2)); //UV
+		NewVboTransparent->setElementDescription(3, YVbo::Element(1)); //Type
+		NewVboTransparent->createVboCpu();
+		//Remplir les VBO
+		foreachVisibleTriangle(false, nbVertOpaque, nbVertTransp, NewVboOpaque, NewVboTransparent);
+		vbo = true;
+	}
 	//On met le chunk ddans son VBO
 	void toVbos(void)
 	{
+		toNewVbos();
+		/*
 		SAFEDELETE(VboOpaque);
 		SAFEDELETE(VboTransparent);
 		
@@ -277,9 +309,15 @@ public:
 		//Remplir les VBO
 		foreachVisibleTriangle(false, nbVertOpaque, nbVertTransp, VboOpaque, VboTransparent);
 		vbo = true;
+		*/
 	}
 
 	void CreateVboGpu() {
+		SAFEDELETE(VboOpaque);
+		SAFEDELETE(VboTransparent);
+
+		VboOpaque = NewVboOpaque;
+		VboTransparent = NewVboTransparent;
 		// On envoie le contenu au GPU
 		VboOpaque->createVboGpu();
 		// On clean le contenu du CPU
@@ -288,6 +326,8 @@ public:
 		VboTransparent->createVboGpu();
 		// On clean le contenu du CPU
 		VboTransparent->deleteVboCpu();
+		NewVboOpaque = NULL;
+		NewVboTransparent = NULL;
 	}
 
 	//Ajoute un quad du cube. Attention CCW
@@ -508,34 +548,34 @@ public:
 		MCube * cubeZPrev = NULL;
 		MCube * cubeZNext = NULL;
 
-		if (x == 0 && Voisins[0] != NULL)
+		/*if (x == 0 && Voisins[0] != NULL)
 			cubeXPrev = (Voisins[0]->_Cubes->get(MCubes::CHUNK_SIZE - 1,y,z));
-		else if (x > 0)
+		else*/ if (x > 0)
 			cubeXPrev = (_Cubes->get(x - 1,y,z));
 
-		if (x == MCubes::CHUNK_SIZE - 1 && Voisins[1] != NULL)
+		/*if (x == MCubes::CHUNK_SIZE - 1 && Voisins[1] != NULL)
 			cubeXNext = (Voisins[1]->_Cubes->get(0,y,z));
-		else if (x < MCubes::CHUNK_SIZE - 1)
+		else */ if (x < MCubes::CHUNK_SIZE - 1)
 			cubeXNext = (_Cubes->get(x + 1,y,z));
 
-		if (y == 0 && Voisins[2] != NULL)
+		/*if (y == 0 && Voisins[2] != NULL)
 			cubeYPrev = (Voisins[2]->_Cubes->get(x,MCubes::CHUNK_SIZE - 1,z));
-		else if (y > 0)
+		else */ if (y > 0)
 			cubeYPrev = (_Cubes->get(x,y - 1,z));
 
-		if (y == MCubes::CHUNK_SIZE - 1 && Voisins[3] != NULL)
+		/*if (y == MCubes::CHUNK_SIZE - 1 && Voisins[3] != NULL)
 			cubeYNext = (Voisins[3]->_Cubes->get(x,0,z));
-		else if (y < MCubes::CHUNK_SIZE - 1)
+		else */ if (y < MCubes::CHUNK_SIZE - 1)
 			cubeYNext = (_Cubes->get(x,y + 1,z));
 
-		if (z == 0 && Voisins[4] != NULL)
+		/*if (z == 0 && Voisins[4] != NULL)
 			cubeZPrev = (Voisins[4]->_Cubes->get(x,y,MCubes::CHUNK_HEIGHT - 1));
-		else if (z > 0)
+		else */ if (z > 0)
 			cubeZPrev = (_Cubes->get(x,y,z - 1));
 
-		if (z == MCubes::CHUNK_HEIGHT - 1 && Voisins[5] != NULL)
+		/*if (z == MCubes::CHUNK_HEIGHT - 1 && Voisins[5] != NULL)
 			cubeZNext = (Voisins[5]->_Cubes->get(x,y,0));
-		else if (z < MCubes::CHUNK_HEIGHT - 1)
+		else */ if (z < MCubes::CHUNK_HEIGHT - 1)
 			cubeZNext = (_Cubes->get(x,y,z + 1));
 
 		if (cubeXPrev == NULL || cubeXNext == NULL ||

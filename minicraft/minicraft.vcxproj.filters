@@ -95,6 +95,9 @@
     <ClInclude Include="..\src\engine\utils\utils.h">
       <Filter>Fichiers d%27en-tête\engine\utils</Filter>
     </ClInclude>
+    <ClInclude Include="src\m_physics.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">

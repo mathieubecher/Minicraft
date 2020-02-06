@@ -98,6 +98,7 @@ public:
 			for (int Y = 0; Y < CHUNK_SIZE; ++Y) {
 				int y = _YPos * CHUNK_SIZE + Y;
 				int airlevel = 0;
+				bool water = false;
 				for (int Z = CHUNK_HEIGHT-1; Z >= 0; --Z) {
 					int z = _ZPos * CHUNK_HEIGHT + Z;
 					float perlin = (Perlin.sample((float)x, (float)y, (float)z));
@@ -105,14 +106,20 @@ public:
 
 					if (perlin > 0.5)
 					{
-						if(z<70) cube->setType(MCube::CUBE_EAU);
+						if (z < 68) water = true;
+						if (z < 66) {
+							cube->setType(MCube::CUBE_EAU);
+							
+						}
 						airlevel = 0;
 					}
 					else
 					{
 						++airlevel;
-						if(airlevel == 1) cube->setType(MCube::CUBE_HERBE);
-						else if (airlevel < 5) cube->setType(MCube::CUBE_TERRE);
+
+						if(airlevel == 1 && !water) cube->setType(MCube::CUBE_HERBE);
+						else if (airlevel < 5 && !water) cube->setType(MCube::CUBE_TERRE);
+						else if (airlevel < 3 && water) cube->setType(MCube::CUBE_SABLE_01);
 						else cube->setType(MCube::CUBE_PIERRE);
 					}
 						

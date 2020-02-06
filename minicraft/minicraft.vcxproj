@@ -33,6 +33,7 @@
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Inputs.h" />
     <ClInclude Include="src\MCubes.h" />
+    <ClInclude Include="src\m_physics.h" />
     <ClInclude Include="src\smartPerlin.h" />
     <ClInclude Include="src\world.h" />
   </ItemGroup>

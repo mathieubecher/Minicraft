@@ -8,6 +8,7 @@
 #include "Inputs.h"
 #include "world.h"
 #include "avatar.h"
+#include "m_physics.h"
 
 class MEngineMinicraft : public YEngine {
 
@@ -184,22 +185,31 @@ public :
 		glPopMatrix();
 
 		glPushMatrix();
-		glUseProgram(SunShader); //Demande au GPU de charger ces shaders
-		GLuint avatarcolor = glGetUniformLocation(SunShader, "sun_color");
-		glUniform3f(avatarcolor, 1,1,1);
-
-		
-		glTranslatef(avatar->Position.X - avatar->Width/2, avatar->Position.Y - avatar->Width / 2, avatar->Position.Z - avatar->CurrentHeight / 2);
+		glTranslatef(avatar->Position.X - avatar->Width / 2, avatar->Position.Y - avatar->Width / 2, avatar->Position.Z - avatar->CurrentHeight / 2);
 		glScalef(avatar->Width, avatar->Width, avatar->CurrentHeight);
-		Renderer->updateMatricesFromOgl(); //Calcule toute les matrices à partir des deux matrices OGL
-		Renderer->sendMatricesToShader(SunShader); //Envoie les matrices au shader
-		
+		glUseProgram(CubeShader);
+		Renderer->updateMatricesFromOgl();
+		Renderer->sendMatricesToShader(CubeShader);
+		var = glGetUniformLocation(CubeShader, "cube_color");
+		glUniform4f(var, 1,1, 1, 1.0f);
 		VboCube->render();
 		glPopMatrix();
+
+		if (avatar->find) {
+			glPushMatrix();
+
+			glTranslatef(avatar->pickPos.X - 0.01f, avatar->pickPos.Y - 0.01f, avatar->pickPos.Z - 0.01f);
+			glScalef(1.02f, 1.02f, 1.02f);
+			glUseProgram(CubeShader);
+			Renderer->updateMatricesFromOgl();
+			Renderer->sendMatricesToShader(CubeShader);
+			var = glGetUniformLocation(CubeShader, "cube_color");
+			glUniform4f(var, 1, 0, 0, 1.0f);
+			VboCube->render();
+			glPopMatrix();
+		}
 		
 	}
-
-	
 
 	void resize(int width, int height) {
 	
@@ -221,11 +231,20 @@ public :
 	{
 		if (button == 1) {
 			wheelMouseClick = state == 0;
+			
 		}
 		else if (button == 2) {
 			rightMouseClick = state == 0;
 		}
-		if(state == 0) CenterPointer();
+		else {
+			if (state == 0 && avatar->find) {
+				World->deleteCube(avatar->pickPos.X, avatar->pickPos.Y, avatar->pickPos.Z);
+			}
+		}
+		if (state == 0) {
+			CenterPointer();
+			
+		}
 
 	}
 	void CenterPointer() {

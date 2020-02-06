@@ -6,6 +6,7 @@
 #include "engine/utils/timer.h"
 #include "world.h"
 #include "Inputs.h"
+#include "m_physics.h"
 
 class MAvatar
 {
@@ -30,6 +31,9 @@ public:
 	float movespeed = 10;
 	float maxspeed = 300;
 	bool fps = true;
+
+	YVec3<int> pickPos;
+	bool find;
 
 	YCamera * Cam;
 	MWorld * World;
@@ -62,11 +66,12 @@ public:
 
 	void update(float elapsed)
 	{
+		Pick();
 		if (elapsed > 1.0f / 60.0f)
 			elapsed = 1.0f / 60.0f;
 		bool lastwater = InWater;
 		InWater = World->getCube((int)floor(Position.X), (int)floor(Position.Y), (int)floor(Position.Z))->getType() == MCube::CUBE_EAU;
-		lastwater = InWater != lastwater;
+		lastwater = InWater != lastwater && !InWater;
 		avance = inputs->Z.press;
 		recule = inputs->S.press;
 		droite = inputs->D.press;
@@ -157,6 +162,36 @@ public:
 		}
 
 	}
+	void Pick(){
+		int maxdist = 10;
+		float mindist = maxdist;
+		YVec3<int> minpos;
+		find = false;
+		YVec3f lineP1 = Cam->Position;
+		YVec3f lineP2 = Cam->Direction * 10 + Cam->Position;
+
+		YVec3<int> campos = YVec3<int>((int)floor(Cam->Position.X), (int)floor(Cam->Position.Y), (int)floor(Cam->Position.Z));
+		for (int x = -maxdist; x < maxdist; ++x) {
+			for (int y = -maxdist; y < maxdist; ++y) {
+				for (int z = -maxdist; z < maxdist; ++z) {
+					MCube * cube = World->getCube(campos.X + x, campos.Y + y, campos.Z + z);
+					if (cube->getDraw() && cube->isSolid()) {
+						float dist;
+
+						bool test = MPhysics::testPick(campos.X + x, campos.Y + y, campos.Z + z, lineP1,lineP2, dist);
+						if (test && dist < mindist) {
+							minpos = YVec3<int>(x, y, z);
+							mindist = dist;
+							find = true;
+						}
+					}
+				}
+			}
+		}
+		if (find) pickPos = campos+minpos;
+	}
+
+	
 };
 float MAvatar::gravity = 9.81f * 3;
 #endif
