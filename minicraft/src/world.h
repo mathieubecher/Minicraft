@@ -70,6 +70,7 @@ public:
 	// Récupération du cube xyz
 	inline MCube * getCube(int x, int y, int z)
 	{
+		if(x<0 || y< 0 || z<0) return &MCube::Air;
 		MChunk * chunk = GetChunk(x, y, z);
 		if (chunk) return chunk->_Cubes->get(x % MCubes::CHUNK_SIZE, y % MCubes::CHUNK_SIZE, z % MCubes::CHUNK_HEIGHT);
 		/*
@@ -147,7 +148,10 @@ public:
 		if (y >= MAT_SIZE * MCubes::CHUNK_SIZE)y = (MAT_SIZE * MCubes::CHUNK_SIZE) - 1;
 		if (z >= MAT_HEIGHT * MCubes::CHUNK_HEIGHT)z = (MAT_HEIGHT * MCubes::CHUNK_HEIGHT) - 1; {
 			MChunk * chunk = GetChunk(x, y, z);
-			chunk->reload = false;
+			chunk->disableHiddenCubes();
+			chunk->WriteChunk();
+			chunk->toVbos();
+			chunk->CreateVboGpu();
 			// Chunks[x / MCubes::CHUNK_SIZE][y / MCubes::CHUNK_SIZE][z / MCubes::CHUNK_SIZE]->disableHiddenCubes();
 			// Chunks[x / MCubes::CHUNK_SIZE][y / MCubes::CHUNK_SIZE][z / MCubes::CHUNK_SIZE]->toVbos();
 		}
@@ -212,17 +216,6 @@ public:
 
 				int i = 0;
 				while (i < listChunks.size()) {
-					if (!listChunks[i]->reload) {
-						
-						listChunks[i]->disableHiddenCubes();
-						
-						listChunks[i]->WriteChunk();
-
-						listChunks[i]->toVbos();
-						
-						listChunks[i]->reload = true;
-						toVBOs.push(listChunks[i]);
-					}
 					if (YVec3f(camChunk.X-listChunks[i]->_XPos, camChunk.Y - listChunks[i]->_YPos, camChunk.Z - listChunks[i]->_ZPos).getSize() > RADIUSDRAW) {
 						
 						lock.lock();
@@ -362,12 +355,11 @@ public:
 		--neighbournumber;
 		while (neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < (RADIUSDRAW)) {
 
-			
-			vector<thread*> t;
+			//vector<thread*> t;
 			lockNeighbour.lock();
 			++neighbournumber;
 			
-			while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < (RADIUSDRAW)) {
+			//while (t.size() < 2 && neighbours.size() > 0 && ((*neighbours.begin()) - actualpos).getSize() < (RADIUSDRAW)) {
 			
 				lockNeighbour.unlock();
 				--neighbournumber;
@@ -377,20 +369,20 @@ public:
 				neighbours.pop_front();
 				lockNeighbour.unlock();
 				--neighbournumber;
-				t.push_back(new std::thread([this,next]() {
+				//t.push_back(new std::thread([this,next]() {
 					addChunk((int)next.X, (int)next.Y, (int)next.Z);
 
-				}));
+				//}));
 
 				// Tri du tableau
 				lockNeighbour.lock();
 				++neighbournumber;
 				neighbours.sort([this](const YVec3<int> & a, YVec3<int> & b) { return compareChunk(a, b); });
 				while (neighbours.size() > 1000) neighbours.pop_back();
-			}
+			//}
 			lockNeighbour.unlock();
 			--neighbournumber;
-			for (int i = 0; i < t.size(); ++i) t[i]->join();
+			//for (int i = 0; i < t.size(); ++i) t[i]->join();
 			
 		}
 	}
