@@ -250,16 +250,13 @@ public:
 	*/
 	int * nbVertOpaque = new int();
 	int * nbVertTransp = new int();
-	bool updateVert = true;
 
 	void toNewVbos(void) {
 		//Compter les sommets
-		if (updateVert) {
-			foreachVisibleTriangle(true, nbVertOpaque, nbVertTransp, NewVboOpaque, NewVboTransparent);
-			updateVert = false;
-		}
+		foreachVisibleTriangle(true, nbVertOpaque, nbVertTransp, NewVboOpaque, NewVboTransparent);
+
 		NewVboOpaque = new YVbo(4, (*nbVertOpaque), YVbo::PACK_BY_ELEMENT_TYPE);
-		NewVboTransparent = new YVbo(4, (*nbVertOpaque), YVbo::PACK_BY_ELEMENT_TYPE);
+		NewVboTransparent = new YVbo(4, (*nbVertTransp), YVbo::PACK_BY_ELEMENT_TYPE);
 		//Créer les VBO
 		NewVboOpaque = new YVbo(4, (*nbVertOpaque), YVbo::PACK_BY_ELEMENT_TYPE);
 		NewVboOpaque->setElementDescription(0, YVbo::Element(3)); //Sommet

@@ -32,7 +32,7 @@ public:
 	static const int MAT_SIZE = 3; //en nombre de chunks
 #endif // DEBUG
 
-	static const int MAT_HEIGHT = 3; //en nombre de chunks
+	static const int MAT_HEIGHT = 6; //en nombre de chunks
 	static const int MAT_SIZE_CUBES = (MAT_SIZE * MCubes::CHUNK_SIZE);
 	static const int MAT_HEIGHT_CUBES = (MAT_HEIGHT * MCubes::CHUNK_HEIGHT);
 	static const int MAT_SIZE_METERS = (MAT_SIZE * MCubes::CHUNK_SIZE * MCube::CUBE_SIZE);
@@ -40,8 +40,8 @@ public:
 
 	static const int PERLINBOTTONBASE = 40;
 	static const int PERLINHEIGHTBASE = 100;
-	static const int RADIUS = 2;
-	static const int RADIUSDRAW = 4;
+	static const int RADIUS = 4;
+	static const int RADIUSDRAW = 8;
 
 	std::vector<MChunk *> listChunks;
 
@@ -215,10 +215,10 @@ public:
 					if (!listChunks[i]->reload) {
 						
 						listChunks[i]->disableHiddenCubes();
-						listChunks[i]->toVbos();
+						
 						listChunks[i]->WriteChunk();
 
-						
+						listChunks[i]->toVbos();
 						
 						listChunks[i]->reload = true;
 						toVBOs.push(listChunks[i]);

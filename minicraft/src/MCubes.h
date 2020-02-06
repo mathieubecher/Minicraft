@@ -26,8 +26,8 @@ public:
 class MCubes : public MCubesClear
 {
 public:
-	static const int CHUNK_SIZE = 64; ///< Taille d'un chunk en nombre de cubes (n*n*n)
-	static const int CHUNK_HEIGHT = 124; ///< Taille d'un chunk en nombre de cubes (n*n*n)
+	static const int CHUNK_SIZE = 32; ///< Taille d'un chunk en nombre de cubes (n*n*n)
+	static const int CHUNK_HEIGHT = 32; ///< Taille d'un chunk en nombre de cubes (n*n*n)
 	static const int PERLINBOTTONBASE = 64;
 	static const int PERLINHEIGHTBASE = 64;
 	static const int PERLINHEIGHTGROT = 80;
