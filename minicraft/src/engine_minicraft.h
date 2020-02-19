@@ -93,9 +93,10 @@ public :
 	bool Crouch;
 	bool Run;
 	*/
+	float totalTime = 0;
 	void update(float elapsed)
 	{
-		
+		totalTime += elapsed;
 		/*
 		YVec3f moveVector = YVec3f(0, 0, 0);
 		if (inputs.Z.press) // Z
@@ -123,14 +124,15 @@ public :
 		World->LoadVBO();
 	}
 
+	float incrHour = 0;
 	void renderObjects() 
 	{
 		float rotateTime = 0;
 		SYSTEMTIME s;
 		GetLocalTime(&s);
 		
-		//rotateTime = s.wHour + s.wMinute/60;
-		rotateTime = ((s.wSecond+s.wMilliseconds/1000.0f) / 60.0f) * 24;
+		rotateTime = s.wHour + s.wMinute/60 + incrHour;
+		//rotateTime = ((s.wSecond+s.wMilliseconds/1000.0f) / 60.0f) * 24;
 		float calculTime = 0;
 		if (rotateTime > 6 && rotateTime <= 19) calculTime = (rotateTime - 6) / 26;
 		else if (rotateTime > 19) calculTime = (rotateTime - 19)/22 + 0.5f;
@@ -181,7 +183,11 @@ public :
 		glPushMatrix();
 		
 		//World->render_world_basic(CubeShader,VboCube);
-		World->render_world_vbo(WorldShader, atlas->terrain, false, false, YVec3f(-0.2f, std::cos(calculTime * 2 * 3.1415f), std::sin(calculTime * 2 * 3.1415f)));
+		glUseProgram(WorldShader);
+		var = glGetUniformLocation(WorldShader, "cam_pos");
+		glUniform3f(var, Renderer->Camera->Position.X, Renderer->Camera->Position.Y, Renderer->Camera->Position.Z);
+
+		World->render_world_vbo(WorldShader, atlas->terrain, false, false, YVec3f(-0.2f, std::cos(calculTime * 2 * 3.1415f), std::sin(calculTime * 2 * 3.1415f)), totalTime);
 		glPopMatrix();
 
 		glPushMatrix();
@@ -220,6 +226,7 @@ public :
 	{	
 		inputs->keyPressed((((special) ? -1 : 1) * (key + ((inputs->Shift.press && key!=32 && !special) ? 32 : 0))), down, p1, p2);
 		if (key == 3 && special && down)avatar->fps = !avatar->fps;
+		if(key == 2 && down) ++incrHour;
 	}
 
 	void mouseWheel(int wheel, int dir, int x, int y, bool inUi)

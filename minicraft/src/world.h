@@ -40,8 +40,8 @@ public:
 
 	static const int PERLINBOTTONBASE = 40;
 	static const int PERLINHEIGHTBASE = 100;
-	static const int RADIUS = 4;
-	static const int RADIUSDRAW = 8;
+	static const int RADIUS = 3;
+	static const int RADIUSDRAW = 6;
 
 	std::vector<MChunk *> listChunks;
 
@@ -698,13 +698,20 @@ public:
 	}
 		
 
-	void render_world_vbo(int shader, YTexFile * texture, bool debug, bool doTransparent, YVec3f sunpos)
+	void render_world_vbo(int shader, YTexFile * texture, bool debug, bool doTransparent, YVec3f sunpos, float time)
 	{
 		
 		//add_world_to_vbo();
 		YEngine * engine = YEngine::getInstance();
 		YVec3f camPos = engine->Renderer->Camera->Position;
 		YVec3f camDir = engine->Renderer->Camera->Direction;
+
+		GLuint var = glGetUniformLocation(shader, "sun_pos");
+		glUniform3f(var, sunpos.X, sunpos.Y, sunpos.Z);
+
+		var = glGetUniformLocation(shader, "time");
+		glUniform1f(var, time);
+
 		glDisable(GL_BLEND);
 		//Dessiner les chunks opaques
 		lock.lock();
@@ -717,10 +724,6 @@ public:
 			if (chunk->draw && !chunk->SetHide(camPos, camDir)) {
 				glPushMatrix();
 				glTranslatef(chunk->_XPos * MCubes::CHUNK_SIZE, chunk->_YPos *MCubes::CHUNK_SIZE, chunk->_ZPos * MCubes::CHUNK_HEIGHT);
-				glUseProgram(shader);
-				GLuint var = glGetUniformLocation(shader, "sun_pos");
-				glUniform3f(var, sunpos.X, sunpos.Y, sunpos.Z);
-
 				YEngine::getInstance()->Renderer->updateMatricesFromOgl(); //Calcule toute les matrices à partir des deux matrices OGL
 				YEngine::getInstance()->Renderer->sendMatricesToShader(shader); //Envoie les matrices au shader
 				texture->setAsShaderInput(shader);
@@ -728,7 +731,9 @@ public:
 				glPopMatrix();
 			}
 		}
+
 		glEnable(GL_BLEND);
+		
 		//Dessiner les chunks transparents
 		for (int i = 0; i < listChunks.size(); ++i) {
 
@@ -737,7 +742,6 @@ public:
 			if (chunk->draw && !chunk->SetHide(camPos, camDir)) {
 				glPushMatrix();
 				glTranslatef(chunk->_XPos * MCubes::CHUNK_SIZE, chunk->_YPos *MCubes::CHUNK_SIZE, chunk->_ZPos * MCubes::CHUNK_HEIGHT);
-				glUseProgram(shader);
 				YEngine::getInstance()->Renderer->updateMatricesFromOgl(); //Calcule toute les matrices à partir des deux matrices OGL
 				YEngine::getInstance()->Renderer->sendMatricesToShader(shader); //Envoie les matrices au shader
 				texture->setAsShaderInput(shader);
@@ -745,6 +749,7 @@ public:
 				glPopMatrix();
 			}
 		}
+		
 		lock.unlock();
 		--locknumber;
 	}
