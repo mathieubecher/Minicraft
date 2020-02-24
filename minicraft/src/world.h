@@ -199,6 +199,7 @@ public:
 
 		// DEBUT DU THREAD QUI GERE LES CHUNK
 		loadder = std::thread([this]() {
+			cout << "begin loadder" << endl;
 			while (!deleteLoadder) {
 				if (updateCampos) {
 					updateCampos = false;
@@ -210,10 +211,8 @@ public:
 
 		// GERE LA PHYSIQUE DES CHUNK VISIBLE
 		physicer = std::thread([this]() {
-			
+			cout << "begin delete" << endl;
 			while (!deleteLoadder) {
-				
-
 				int i = 0;
 				while (i < listChunks.size()) {
 					if (YVec3f(camChunk.X-listChunks[i]->_XPos, camChunk.Y - listChunks[i]->_YPos, camChunk.Z - listChunks[i]->_ZPos).getSize() > RADIUSDRAW) {

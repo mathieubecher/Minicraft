@@ -16,7 +16,7 @@ public:
 	}
 	void keyPressed(int key, bool down, int p1, int p2)
 	{
-		cout << key << endl;
+		//cout << key << endl;
 		if (key == Z.keyCode) Z.Press(down);
 		else if (key == Q.keyCode) Q.Press(down);
 		else if (key == S.keyCode) S.Press(down);

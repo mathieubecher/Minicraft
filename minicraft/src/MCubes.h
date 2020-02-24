@@ -57,6 +57,7 @@ public:
 				for (int Z = CHUNK_HEIGHT-1; Z >= 0; --Z) {
 					int z = _ZPos * CHUNK_HEIGHT + Z;
 					float perlin = (Perlin.sample((float)x, (float)y, (float)z));
+					
 					if (Z == CHUNK_HEIGHT - 1 && perlin <= 0.5f) {
 						bool isAir = false;
 						while (airlevel < 5 && !isAir) {
@@ -65,6 +66,7 @@ public:
 							
 						}
 					}
+					
 					water = (z + airlevel < 68);
 					MCube *cube =  &_Cubes[X][Y][Z];
 

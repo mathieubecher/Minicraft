@@ -11,7 +11,8 @@ uniform float time;
 uniform sampler2D colorTex1;
 
 out vec4 color_out;
-uniform vec3 sun_pos; 
+uniform vec3 sun_pos;
+uniform vec4 sun_color; 
 uniform vec3 cam_pos;
 //Globales
 const float ambientLevel = 0.4;
@@ -41,18 +42,21 @@ void main()
 	float specForce = 0;
 	if(type == CUBE_EAU) specForce = 1;
 	vec4 texture = texture(colorTex1, uv);
-	texture.rgb = pow(texture.rgb,vec3(2,2,2));
+	texture.rgb =texture.rgb;
 
 	// Apply color for gray
 	if(texture.r == texture.g && texture.r==texture.b) 
 		texture = texture * color;
-	
+
+	// Prepare texture for treatment
+	texture.rgb = pow(texture.rgb,vec3(2,2,2));
+
 	// Direct vector
 	vec3 L = normalize(sun_pos);
 	vec3 V = normalize(cam_pos - wPos);
 	vec3 N = normal;
 
-	// Update normal && 
+	// Update normal
 	if(type == CUBE_EAU){
 		vec3 A = wPos;
 		A.z -= noiseWater(A) * WAVEFORCE;
@@ -77,9 +81,9 @@ void main()
 	float spec = abs(dot(N,H));
 	spec = 5f * pow(spec,100) * specForce;
 
-	texture.rgb += vec3(1,1,1) * spec * diff;
+	texture.rgb += sun_color.xyz * spec * diff;
 	// ambiant
-	texture.rgb += 0.01 * vec3(1,1,1) * (1-diff);
+	texture.rgb += 0.01 * sun_color.xyz * (1-diff);
 
 	color_out = vec4(sqrt(texture.rgb),texture.a);
 	//color_out = vec4(N*10,1);
