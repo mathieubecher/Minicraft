@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="YEngineTest" Collapsed="true">
+    <Position X="1.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAQAAAAEQAAQAEQABAAAAAACAAgAYAAUAIAAAEAAA=</HashCode>
+      <FileName>src\engine_test.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YEngine" Collapsed="true">
+    <Position X="1.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAQgAAAERUAmIhIUAAAAQjIAIAgAYGUWDgUAAEgBU=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\engine.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YCamera" Collapsed="true">
+    <Position X="3.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAQgQIAkYAIAAigACAQAAADAAAIELAACBCAAAAEAAI=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\render\camera.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YFbo" Collapsed="true">
+    <Position X="5.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EUAAAAABAASAAQAAAAAAQEAAAAEEAAIAAQAAAIAQEAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\render\fbo.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YRenderer" Collapsed="true">
+    <Position X="3.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BhAGAACAAEAAAgCIggEACAQgMQBQVAzMCQAEACAQAQI=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\render\renderer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YTextEngine" Collapsed="true">
+    <Position X="9" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAiYAAAAAAAAAABAAAAABAAAAACAAAEQCACY=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\render\text_engine.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YTexFile" Collapsed="true">
+    <Position X="7.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAEAAAAAAAAAAAAAAAAEAJBIAAIoABAAAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\render\tex_manager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YTexManager" Collapsed="true">
+    <Position X="7.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgBQAAAAAAAAAEAAAEAAAABAQAACAQBEAAAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\render\tex_manager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YVbo" Collapsed="true">
+    <Position X="5.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QIAEAggBBEAAQAAAAOEQAAAAAACACAAAAAAAAAAUBAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\render\vbo.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YLog" Collapsed="true">
+    <Position X="18.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAEAAECABAAIAAAAAAAAAAAAAAAAE=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\log\log.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YLogConsole" Collapsed="true">
+    <Position X="17.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAABAAAAIAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\log\log_console.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YLogFile" Collapsed="true">
+    <Position X="19.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAABAAAAIAAEAAAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\log\log_file.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUIBouton" Collapsed="true">
+    <Position X="19.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAABAEAAABAAAAAQAAAAoEAQAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\bouton.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUIComboBox" Collapsed="true">
+    <Position X="1.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEACAAAAABAABAEAQAwAQAAAAAAAAEBAAIAAQAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\combox.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUIEdtBox" Collapsed="true">
+    <Position X="8.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAAABAAAYAAAAACQEQgAAASAAAAAKAAwAIA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\edtbox.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUIImage" Collapsed="true">
+    <Position X="10.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAABABAgAAAAAAIAAQAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\image.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUILabel" Collapsed="true">
+    <Position X="12.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEAEABAAAAAAAAQAAAAACAAQAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\label.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUILoading" Collapsed="true">
+    <Position X="10.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAUAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\loading.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUILstBox" Collapsed="true">
+    <Position X="17.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EEAABAEAAoAACAAhIAACFAAQBRAEQQAAGAIAIAAwAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\lstbox.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUIPanel" Collapsed="true">
+    <Position X="10.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAMENAgABAAAAQAQAEAQEAAAEACICAAAIECUYAE=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\panel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUIPBar" Collapsed="true">
+    <Position X="3.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAACAQBIEAAgAEEIQBAAAAIAAABgAAAAgIAAQAAQ=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\progressbar.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUIScreen" Collapsed="true">
+    <Position X="14" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAABAAAAAAQQAAQAAAAAAAAAAAAYAAUAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\screen.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUIScreenManager" Collapsed="true">
+    <Position X="12.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAAABAAAAAAABAAQAAAAAAAIgAAAIEAUAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\screen_manager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUISlider" Collapsed="true">
+    <Position X="15" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAACAQBIEQCgAEEIAAAIAAAAAAAAAAAAgIAAQAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\slider.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Courbe" Collapsed="true">
+    <Position X="6" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAgAAQAAAAAAAAAAAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\slope.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GUISlope" Collapsed="true">
+    <Position X="6" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAEAAAAAAAABDABKAIQBAQAAAAAAQACIAAQAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\gui\slope.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YTimer" Collapsed="true">
+    <Position X="14.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAMAACAIAAABAAAgAAAAEAAAAAAABEgAAAABAAgAAEA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\utils\timer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YVec3&lt;T&gt;" Collapsed="true">
+    <Position X="11.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAgAAIAQAAAAAgAYAQAAACAAAIAAAAAgAAEAcAE=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\utils\types_3d.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YPlane" Collapsed="true">
+    <Position X="11.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEBAAAAAQCAAAAAAAAAAgAAAAEABAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\utils\types_3d.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YTransform" Collapsed="true">
+    <Position X="11.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAEAAAAAIAAAAAAAAAAAASAEAAAAAIEAAAkAAAQBAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\utils\types_3d.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="YPerlin" Collapsed="true">
+    <Position X="14.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAQAAAABAgAAAAAAAAEAAAACAQAAAAAAAKAAAAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\noise\perlin.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="YColor" Collapsed="true">
+    <Position X="11.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAACgAAAAAAAACAAEIAAAAAAoIAFQCQA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\utils\types_3d.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="YMat44" Collapsed="true">
+    <Position X="11.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAFBAACoAAAAAAQAAAAAACAAACAAwHAAIAAA=</HashCode>
+      <FileName>C:\Users\guillaume\Documents\2019\Cours\Sym\yocto_exercice\src\engine\utils\types_3d.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine">
+      <UniqueIdentifier>{82d40db2-d719-47be-a776-be83fe6fe318}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine\render">
+      <UniqueIdentifier>{80d49003-1e94-487c-b284-84911d178fac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\engine">
+      <UniqueIdentifier>{36f29580-fe93-48c8-9b56-ae150defca32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\engine\render">
+      <UniqueIdentifier>{3f4857e3-d1fe-468b-8f06-5f45efc0a3cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine\log">
+      <UniqueIdentifier>{ec0c8b6b-0e44-4d86-b5f5-b4fa7f5f1d55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine\gui">
+      <UniqueIdentifier>{75342118-b9ac-4798-9ad7-050d78fc12f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\engine\utils">
+      <UniqueIdentifier>{7c877c05-127c-4ff7-a07c-7db3208351d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{5cd5efa5-dbcf-4381-9da6-552dc47b4742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\postprocess">
+      <UniqueIdentifier>{0981a81e-2087-47a5-82c0-837b5b38049c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\material1">
+      <UniqueIdentifier>{5ac2754f-8590-4852-a492-c1ffb7908a9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\engine\noise">
+      <UniqueIdentifier>{f9e057c2-ef1a-44ef-856d-b1364cd1b655}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\engine\render\fbo.cpp">
+      <Filter>Fichiers sources\engine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\render\vbo.cpp">
+      <Filter>Fichiers sources\engine\render</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\engine\render\renderer.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\render\fbo.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\log\log.h">
+      <Filter>Fichiers d%27en-tête\engine\log</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine_test.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\log\log_console.h">
+      <Filter>Fichiers d%27en-tête\engine\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\render\camera.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\render\text_engine.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\bouton.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\combox.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\edtbox.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\gui.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\image.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\label.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\loading.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\lstbox.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\panel.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\progressbar.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\screen.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\screen_manager.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\slider.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\gui\slope.h">
+      <Filter>Fichiers d%27en-tête\engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\log\log_file.h">
+      <Filter>Fichiers d%27en-tête\engine\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\render\tex_manager.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\render\vbo.h">
+      <Filter>Fichiers d%27en-tête\engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\noise\perlin.h">
+      <Filter>Fichiers d%27en-tête\engine\noise</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\engine.h">
+      <Filter>Fichiers d%27en-tête\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="run\shaders\postprocess\fs.glsl">
+      <Filter>shaders\postprocess</Filter>
+    </None>
+    <None Include="run\shaders\material1\fs.glsl">
+      <Filter>shaders\material1</Filter>
+    </None>
+    <None Include="run\shaders\material1\vs.glsl">
+      <Filter>shaders\material1</Filter>
+    </None>
+    <None Include="run\shaders\postprocess\vs.glsl">
+      <Filter>shaders\postprocess</Filter>
+    </None>
+  </ItemGroup>
+</Project>
